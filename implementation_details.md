@@ -22,7 +22,24 @@
 - latency
  -- add and or remove
 
-/* Interface */
-- insert
-- erase
-- find/contains
+/*** Interfaces ***/
+class LockableNode {
++ T item; //value held by the Node
++ bool lock()
++ void unlock()
+- std::atomic_flag lockState //because lock-free; http://en.cppreference.com/w/cpp/atomic/atomic_flag
+}
+
+class Window {
++ Window::Window(LockNode &pred, LockNode &curr);
++ void unlock() //unlocks pred and curr
++ LockNode &pred, &curr;
+}
+
+class Set {
++ bool add(T &item)
++ bool erase(T &item)
++ Window getWindow/find(T item)
++ bool contains(T item)
+}
+
