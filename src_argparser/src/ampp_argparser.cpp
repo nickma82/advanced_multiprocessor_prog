@@ -18,6 +18,9 @@ int main (int argc, char **argv) {
 		return -1;
 
 	std::cout << "implementation is: " << cmdOption.getValue("implementation") << std::endl; // prints !!!Hello World!!!
-	std::cout << "add is: " << cmdOption.getValue("add") << std::endl;
+	if(cmdOption.getValue("add")) {
+		bool add = cmdOption.getValue("add");
+		std::cout << "add is: " << add << std::endl;
+	}
 	return 0;
 }

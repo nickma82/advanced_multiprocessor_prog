@@ -14,14 +14,16 @@
 
 using namespace std;
 
-const std::string CommandLineOptions::getValue(const std::string& key) const {
-	auto it =_optionsMap.find(key);
+
+ReturnProxy CommandLineOptions::getValue(const std::string& key)  {
+	auto it = _optionsMap.find(key);
 
 	/* if found return value, else ISMISSING*/
 	if (it != _optionsMap.end())
-		return it->second;
-	return OPTARG_BOOL_ISMISSING;
+		return ReturnProxy(it->second);
+	return ReturnProxy(OPTARG_BOOL_ISMISSING);
 }
+
 
 void CommandLineOptions::usage() {
 	std::cout << "Usage: " << std::endl;

@@ -16,17 +16,33 @@
 #define OPTARG_BOOL_ISAVAILABLE "1"
 #define OPTARG_BOOL_ISMISSING	"0"
 
+/**
+ * that class is used as a type conversion proxy to
+ * support return type std::string along with bool
+ */
+class ReturnProxy {
+public:
+	ReturnProxy(const std::string value) : value(value) {}
+
+	operator bool() const {	return (value == OPTARG_BOOL_ISAVAILABLE); }
+	operator std::string() const { return value; }
+private:
+	std::string value;
+};
+
 class CommandLineOptions {
 public:
 
-	/* parses command line args originally given to main(...)
+	/** parses command line args originally given to main(...)
 	 *  and manages them internally in a key-value map.
 	 * After successful parsing the values are accessible via
 	 *  getValue(..)
 	 */
 	int parse_args(int argc, char **argv);
 
-	const std::string getValue(const std::string& key) const;
+	/** used to obtain a value parsed by CommandLineOptions::parse_args(..)
+	 */
+	ReturnProxy getValue(const std::string& key);
 
 private:
 	//see c++11 uniform initialization, note size must be given
