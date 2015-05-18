@@ -12,11 +12,12 @@
 #include "cmdlineOptions.h"
 
 int main (int argc, char **argv) {
-	CommandLineOptions cmdOption = CommandLineOptions();
+	CommandLineOptions cmdOption;
 	int rc = cmdOption.parse_args(argc, argv);
 	if (rc < 0)
 		return -1;
 
-	std::cout << cmdOption.getValue("implementation") << std::endl; // prints !!!Hello World!!!
+	std::cout << "implementation is: " << cmdOption.getValue("implementation") << std::endl; // prints !!!Hello World!!!
+	std::cout << "add is: " << cmdOption.getValue("add") << std::endl;
 	return 0;
 }

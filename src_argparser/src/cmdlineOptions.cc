@@ -5,9 +5,6 @@
  *      Author: nickma
  */
 
-
-//#include <unistd.h>
-
 #include <sys/ioctl.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -20,16 +17,16 @@ using namespace std;
 const std::string CommandLineOptions::getValue(const std::string& key) const {
 	auto it =_optionsMap.find(key);
 
-	/* if found return */
+	/* if found return value, else ISMISSING*/
 	if (it != _optionsMap.end())
 		return it->second;
-	return "";
+	return OPTARG_BOOL_ISMISSING;
 }
 
 void CommandLineOptions::usage() {
-	printf("Usage: \n");
-	printf("valid arguments are:\n");
-	printf("\t --add --remove --random\n");
+	std::cout << "Usage: " << std::endl;
+	std::cout << "valid arguments are:" << std::endl;
+	std::cout << "\t --add --remove --random" << std::endl;
 
 	std::cout << "\t --implementation={FGL, OS, LS, LBS, REF}" << std::endl;
 	std::cout << "\t --threadCount=[1,512]" << std::endl;
@@ -59,20 +56,24 @@ int CommandLineOptions::parse_args(int argc, char **argv) {
 		switch (optChar) {
 		case 0: {
 			std::string optionName(long_options_common[option_index].name);
-			std::cout << "option '" <<  optionName << "'";
 
+			/* the actual work */
+			std::string strOptArg = (optarg) ? optarg : OPTARG_BOOL_ISAVAILABLE;
+			auto retPair = _optionsMap.insert ( std::pair<std::string,std::string>(optionName, strOptArg) );
+
+			/* some debugging */
+			std::cout << "option '" <<  optionName << "' ";
 			if (optarg) {
-				printf(" with arg %s", optarg);
-				auto retPair = _optionsMap.insert ( std::pair<std::string,std::string>(optionName,optarg) );
-				if (retPair.second == false)
-					std::cout << " element '" << optionName << "' already existed";
+				std::cout << "with arg " <<  optarg;
 			}
-
+			if (retPair.second == false)
+				std::cout << "element '" << optionName << "' already existed";
+			/* vorletztes Argument, derzeit alles nullptr */
 			if ( (option_index >= 0) && (optarg) && (tmpValue >= 0) ) {
-				std::cout << " additionally tmpValue is set to: " << tmpValue;
+				std::cout << "additionally tmpValue is set to: " << tmpValue;
 			}
-
 			std::cout << std::endl;
+
 			break;
 		}
 		case '?':
@@ -80,7 +81,7 @@ int CommandLineOptions::parse_args(int argc, char **argv) {
 			usage();
 			return -1;
 		default:
-			fprintf(stderr, "Unrecognized option: '-%c'\n", optChar);
+			std::cerr << "Unrecognized option: " << optChar << std::endl;
 			usage();
 			return -1;
 		}
@@ -88,10 +89,10 @@ int CommandLineOptions::parse_args(int argc, char **argv) {
 
 	/* Print any remaining command line arguments (not options). */
 	if (optind < argc) {
-		printf("non-option ARGV-elements: ");
+		std::cout << "non-option ARGV-elements: ";
 		while (optind < argc)
-			printf("%s ", argv[optind++]);
-		printf("\n");
+			std::cout << " " << argv[optind++];
+		std::cout << std::endl;
 	}
 
 	return 0;

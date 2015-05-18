@@ -13,6 +13,8 @@
 #include <getopt.h>
 
 #define TESTVALUE 42
+#define OPTARG_BOOL_ISAVAILABLE "1"
+#define OPTARG_BOOL_ISMISSING	"0"
 
 class CommandLineOptions {
 public:
