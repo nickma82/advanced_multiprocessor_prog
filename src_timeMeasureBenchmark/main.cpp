@@ -20,7 +20,7 @@
 #include <future>
 
 #include <sys/time.h>
-//#include <time.h>
+#include <ctime>
 #include <chrono>
 
 #define BILLION 1000000000
@@ -48,16 +48,27 @@ int timeDiff(struct timespec *result, struct timespec *x,
 }
 
 int main(int argc, char **argv) {
-	struct timespec result, tmpTimeNow, mytime1, highPrecision1, timeOfDay;
+	struct timespec result, tmpTimeNow, mytime1, highPrecision1, timeOfDay, clock1, clockGettime;
+	std::cout << "method \t\t\t\t\t\ttime [s]" << std::endl;
 
-	//
+	clock_t t;
+	//  t = clock() - t;
+	//  cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+	clock_gettime(CLOCK_MONOTONIC, &clock1);
+	for(int i = 0; i<999; ++i) {
+		t = clock();
+	}
+	clock_gettime(CLOCK_MONOTONIC, &tmpTimeNow);
+	timeDiff(&result, &tmpTimeNow, &clock1);
+	std::cout << "clock \t\t\t\t\t\t" << result.tv_sec << "." << std::setfill ('0') << std::setw (9) << result.tv_nsec << std::endl;
+
 	clock_gettime(CLOCK_MONOTONIC, &mytime1);
 	for(int i = 0; i<999; ++i) {
 		std::chrono::steady_clock::now();
 	}
 	clock_gettime(CLOCK_MONOTONIC, &tmpTimeNow);
 	timeDiff(&result, &tmpTimeNow, &mytime1);
-	std::cout << "1000 times std::chrono::steady_clock::now(): \t\t" << result.tv_sec << "." << std::setfill ('0') << std::setw (9) << result.tv_nsec << std::endl;
+	std::cout << "std::chrono::steady_clock::now() \t\t" << result.tv_sec << "." << std::setfill ('0') << std::setw (9) << result.tv_nsec << std::endl;
 
 
 	clock_gettime(CLOCK_MONOTONIC, &highPrecision1);
@@ -66,7 +77,7 @@ int main(int argc, char **argv) {
 	}
 	clock_gettime(CLOCK_MONOTONIC, &tmpTimeNow);
 	timeDiff(&result, &tmpTimeNow, &highPrecision1);
-	std::cout << "1000 times std::chrono::high_resolution_clock::now(): \t" << result.tv_sec << "." << std::setfill ('0') << std::setw (9) << result.tv_nsec << std::endl;
+	std::cout << "std::chrono::high_resolution_clock::now() \t" << result.tv_sec << "." << std::setfill ('0') << std::setw (9) << result.tv_nsec << std::endl;
 
 
 	struct timeval start;
@@ -76,7 +87,15 @@ int main(int argc, char **argv) {
 	}
 	clock_gettime(CLOCK_MONOTONIC, &tmpTimeNow);
 	timeDiff(&result, &tmpTimeNow, &timeOfDay);
-	std::cout << "1000 times gettimeofday: \t\t\t\t" << result.tv_sec << "." << std::setfill ('0') << std::setw (9) << result.tv_nsec << std::endl;
+	std::cout << "gettimeofday \t\t\t\t\t" << result.tv_sec << "." << std::setfill ('0') << std::setw (9) << result.tv_nsec << std::endl;
+
+	clock_gettime(CLOCK_MONOTONIC, &clockGettime);
+	for(int i = 0; i<999; ++i) {
+		clock_gettime(CLOCK_MONOTONIC, &tmpTimeNow);
+	}
+	clock_gettime(CLOCK_MONOTONIC, &tmpTimeNow);
+	timeDiff(&result, &tmpTimeNow, &clockGettime);
+	std::cout << "glock_gettime \t\t\t\t\t" << result.tv_sec << "." << std::setfill ('0') << std::setw (9) << result.tv_nsec << std::endl;
 
 	return 0;
 }
