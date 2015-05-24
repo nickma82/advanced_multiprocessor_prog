@@ -12,7 +12,7 @@
 
 #include <iostream>
 #include <thread>
-#include "FineGrainedLockingSet.h"
+#include "OptimisticSynchronizationSet.h"
 
 void test(int t, AMPSet *rs, volatile bool *start)
 {
@@ -40,7 +40,7 @@ int main()
 {
 	
 	//run some basic functionality tests
-	FineGrainedLockingSet rs1;
+	OptimisticSynchronizationSet rs1;
 	
 	
 	std::cout << std::boolalpha;   
@@ -63,7 +63,7 @@ int main()
 	
 	//run 4 test threads
 	
-	FineGrainedLockingSet rs2;
+	OptimisticSynchronizationSet rs2;
 
 	bool start = false;
 	
@@ -71,7 +71,9 @@ int main()
 	std::thread second (test, 2, &rs2, &start); 
 	std::thread third (test, 3, &rs2, &start); 
 	std::thread fourth (test, 4, &rs2, &start); 
+	
 	start = true;
+	
 	first.join();
 	second.join();
 	third.join();
