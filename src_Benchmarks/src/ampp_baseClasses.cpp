@@ -7,65 +7,75 @@
 //============================================================================
 
 #include <iostream>
-#include <chrono>
 #include <vector>
-#include <stdexcept>
-
 #include <thread>
-using namespace std;
+
+#include <memory> //for shared_ptr
+#include <map>
+#include <list>
+#include <utility> //pair, make_pair
+#include "TimeMeasurement.h"
 
 
-/* Memory Management */
-//class MemoryPool
-//class MemoryManager
-
-class TimeMeasurement {
+class TimerValue {
 public:
-	void time_start() {
-		auto tmpTimeNow = std::chrono::high_resolution_clock::now();
+	DURATION_BASE	duration = std::chrono::seconds(0);
+	TimerType 		timerType = ID_UNDEFINED;
 
-		_setMeasurementRunning(true);
-		_startTime = tmpTimeNow;
-		_invalidateTimeSpan();
-	}
+	TimerValue(const DURATION_BASE &duration, const TimerType &type = ID_UNDEFINED) :
+		duration(duration), timerType(type) {};
 
-	void time_stop() {
-		auto tmpTimeNow = std::chrono::high_resolution_clock::now();
+	virtual ~TimerValue() {};
 
-		_setMeasurementRunning(false);
-		_timespan = std::chrono::duration_cast<std::chrono::milliseconds>
-				(tmpTimeNow - _startTime);
-	}
-
-	std::chrono::milliseconds getTimeSpan() const {
-		if(_timespan == INVALIDTIMESPAN)
-			throw std::runtime_error("requested timespan currently invalid");
-
-		return _timespan;
-	}
-
-private:
-	const std::chrono::milliseconds INVALIDTIMESPAN = std::chrono::seconds(0);
-
-	bool _measurementRunning = false;
-	std::chrono::time_point<std::chrono::high_resolution_clock> _startTime;
-	std::chrono::milliseconds _timespan;
-
-	void _invalidateTimeSpan() {
-		_timespan = INVALIDTIMESPAN;
-	}
-
-	void _setMeasurementRunning(const bool &nextState) {
-		/* consistency check */
-		if(_measurementRunning == nextState)
-			throw std::runtime_error(
-					std::string("cant set the clock twice to the same value: ") +
-					std::string(nextState?"1":"0") );
-
-		_measurementRunning = nextState;
+	virtual void printValues() {
+		std::cout << "time:" << duration.count()
+				<< " type:" << timerType << std::endl;
 	}
 };
+/**
+ * Every thread gets a TimerStore
+ */
+class TimerStore {
+public:
+	/**
+	 * List of pairs holding the TimerType and the corresponding value
+	 * adding elements to a list has constant complexity
+	 */
+	std::list<TimerValue> measuredValues;
 
+	void addTimeMeasurement(StartStopTimer &measurement) {
+		//auto value = std::pair<TimerType, DURATION_BASE>(timer.type, timer.getTimeSpan());
+		measuredValues.push_back( TimerValue(measurement.getTimeSpan(), measurement.type) );
+	}
+
+//	std::map<TimerType, std::shared_ptr<StartStopTimer>> timerPool;
+//	{	for(TimerType id: allTimerIDs) {
+//			auto newTimerObject = std::shared_ptr<StartStopTimer>(new StartStopTimer(id));
+//			timerPool.insert( {id, newTimerObject} );
+//		}
+//		std::cout << "created " << timerPool.size() << " timer objects, they are now ready to use"<< std::endl;
+//	}
+};
+
+
+class ThreadTimerValue : public TimerValue {
+public:
+	unsigned int	threadID = 0;
+
+	ThreadTimerValue(const TimerValue &tv, const unsigned int id) :
+		TimerValue(tv), threadID(id) {};
+
+	ThreadTimerValue(const DURATION_BASE &duration, const TimerType &type, const unsigned int id) :
+		TimerValue(duration, type), threadID(id) {};
+
+	virtual ~ThreadTimerValue() {};
+
+	virtual void printValues() {
+		std::cout << "time[us]:" << duration.count()
+				<< " type:" << timerType
+				<< " id:" << threadID << std::endl;
+	}
+};
 /* to be tested
 - how long Inserting
 - how fair is it
@@ -77,27 +87,39 @@ private:
 - latency
  -- add and or remove
 */
-class ConcreteBenchmark : public TimeMeasurement{
-public:
-	unsigned int counter_insert = 0;
-	unsigned int counter_remove = 0;
-	unsigned int counter_contains = 0;
+class TimerAnalyser {
+	void addTimesFromTimerStore(const TimerStore &store) {
+
+	}
+
+//	void sumTimerType
 };
 
-
-class BenchmarkAnalyser {
-	void sumConcreteBenchmars(std::vector<ConcreteBenchmark>& benchmarks) {}
-};
 
 
 
 int main() {
-
-	TimeMeasurement measure;
+	std::cout << "### TimeMeasure tests" << std::endl;
+	StartStopTimer measure;
 	measure.time_start();
-	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	measure.time_stop();
+	std::cout << "Time needed:" << measure.getTimeSpan().count() << std::endl;
 
-	cout << "Time needed:" << measure.getTimeSpan().count() << endl;
+
+	std::cout << "### Timer Value tests" << std::endl;
+	TimerValue tv(std::chrono::seconds(1), ID_INSERT);
+	tv.printValues();
+	ThreadTimerValue ttv(tv, 5);
+	ttv.printValues();
+	ThreadTimerValue ttv2(std::chrono::seconds(1), ID_INSERT, 3);
+	ttv2.printValues();
+
+	std::cout << "### TimerStore tests, which every thread uses to store different time measurements" << std::endl;
+	TimerStore ts;
+	ts.addTimeMeasurement(measure);
+	ts.addTimeMeasurement(measure);
+
+
 	return 0;
 }
