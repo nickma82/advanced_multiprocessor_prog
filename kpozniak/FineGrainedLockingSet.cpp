@@ -11,8 +11,16 @@
 #include "FineGrainedLockingSet.h"
 
 FineGrainedLockingSet::FineGrainedLockingSet() {
-head = new Node(LONG_MIN, new Node(LONG_MAX, NULL));
+	head = new Node(LONG_MIN, new Node(LONG_MAX, NULL));
+}
 
+FineGrainedLockingSet::~FineGrainedLockingSet() {
+	Node* node = head;
+	while(node != NULL) {
+		Node* next = node->next;
+		delete node;
+		node = next;
+	}
 }
 
 bool FineGrainedLockingSet::add(long item) {
@@ -35,7 +43,7 @@ bool FineGrainedLockingSet::remove(long item) {
 	}
 	w.pred->next = w.curr->next;
 	w.unlock();
-	//delete(w.curr); // safe to delete
+	delete w.curr; // safe to delete
 	return true;
 }
 
@@ -46,7 +54,7 @@ bool FineGrainedLockingSet::contains(long item) {
 	return found;
 }
 
-FineGrainedLockingSet::Window FineGrainedLockingSet::find(long item) {
+Window FineGrainedLockingSet::find(long item) {
 	// Search for item or successor
 	Node* pred = head;
 	Node* curr = pred->next;
@@ -63,25 +71,25 @@ FineGrainedLockingSet::Window FineGrainedLockingSet::find(long item) {
 	
 }
 
-void FineGrainedLockingSet::Node::lock() {
+void Node::lock() {
 	mutex.lock();
 }
 
-void FineGrainedLockingSet::Node::unlock() {
+void Node::unlock() {
 	mutex.unlock();
 }
 
-void FineGrainedLockingSet::Window::unlock() {
+void Window::unlock() {
 	pred->unlock();
 	curr->unlock();
 }
 
-FineGrainedLockingSet::Window::Window(Node* pred, Node* curr) {
+Window::Window(Node* pred, Node* curr) {
 	this->pred = pred;
 	this->curr = curr;
 }
 
-FineGrainedLockingSet::Node::Node(long item, Node* next){
+Node::Node(long item, Node* next){
 	this->item = item;
 	this->next = next;
 }
