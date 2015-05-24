@@ -35,13 +35,13 @@ void addTest(AMPSet *rs, int n, std::vector<long> *vec)
 	
 }
 
-void containsTest(AMPSet *rs, int n)
+void containsTest(AMPSet *rs, int n, bool expected)
 {
 	long i=0;
 	
 	while(i<n) {
 		
-		if(!rs->contains(i)) {
+		if(rs->contains(i) != expected) {
 			std::cout << "wrong contain!! \n";
 			exit(EXIT_FAILURE);
 		}
@@ -103,7 +103,7 @@ void test(AMPSet *set, int threads, int iterations) {
 	//check if every element was only added once
 	
 	std::set<long> checkDuplicates1;
-		
+	
 	for(int i=0; i<threads; i++) {
 		std::vector<long> vector = checkVectors1.at(i);
 		while(!vector.empty()) {
@@ -123,7 +123,7 @@ void test(AMPSet *set, int threads, int iterations) {
 	std::vector<std::thread> threadVector2(threads);
 	
 	for(int i=0; i<threads; i++) {
-		threadVector2.at(i) = std::thread (containsTest, set, iterations);
+		threadVector2.at(i) = std::thread (containsTest, set, iterations, true);
 	}
 	
 	for(int i=0; i<threads; i++) {
@@ -160,7 +160,19 @@ void test(AMPSet *set, int threads, int iterations) {
 			}
 		}
 	}
-		
+	
+	//check if the set is now empty
+	
+	std::vector<std::thread> threadVector4(threads);
+	
+	for(int i=0; i<threads; i++) {
+		threadVector4.at(i) = std::thread (containsTest, set, iterations, false);
+	}
+	
+	for(int i=0; i<threads; i++) {
+		threadVector4.at(i).join();
+	}
+	
 	std::cout << "test successfull \n";
 	
 	
