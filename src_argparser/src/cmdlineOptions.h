@@ -5,12 +5,16 @@
  *      Author: nickma
  */
 
+#pragma once
+
 #ifndef CMDLINEOPTIONS_H_
 #define CMDLINEOPTIONS_H_
 
 #include <map>
 #include <string>
 #include <getopt.h>
+#include <sstream>
+#include <ostream>
 
 #define TESTVALUE 42
 #define OPTARG_BOOL_ISAVAILABLE "1"
@@ -24,11 +28,26 @@ class ReturnProxy {
 public:
 	ReturnProxy(const std::string value) : value(value) {}
 
+	//source of the stringToNumber function: http://www.cplusplus.com/forum/articles/9645/
+	template <typename T>
+	T stringToNumber ( const std::string &Text ) const//Text not by const reference so that the function can be used with a
+	{//character array as argument
+		std::istringstream ss(Text);
+		T result;
+		return ss >> result ? result : 0;
+	}
+
 	operator bool() const {	return (value == OPTARG_BOOL_ISAVAILABLE); }
+	operator int() const { return stringToNumber<int>(value); }
 	operator std::string() const { return value; }
 private:
 	std::string value;
 };
+
+inline std::ostream &operator<<(std::ostream &out, const ReturnProxy &rp) {
+		out << (std::string)rp;
+		return out;
+}
 
 class CommandLineOptions {
 public:

@@ -17,10 +17,12 @@ int main (int argc, char **argv) {
 	if (rc < 0)
 		return -1;
 
-	std::cout << "implementation is: " << cmdOption.getValue("implementation") << std::endl; // prints !!!Hello World!!!
+	std::cout << "implementation is: " << cmdOption.getValue("implementation") << std::endl;
 	if(cmdOption.getValue("add")) {
 		bool add = cmdOption.getValue("add");
 		std::cout << "add is: " << add << std::endl;
 	}
+
+	std::cout << "threadCount:" << (int)cmdOption.getValue("threadCount") << std::endl;
 	return 0;
 }
