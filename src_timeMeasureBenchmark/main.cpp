@@ -51,6 +51,7 @@ int main(int argc, char **argv) {
 	struct timespec result, tmpTimeNow, mytime1, highPrecision1, timeOfDay, clock1, clockGettime;
 	std::cout << "method \t\t\t\t\t\ttime [s]" << std::endl;
 
+	// Returns the processor time consumed by the program.
 	clock_t t;
 	//  t = clock() - t;
 	//  cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
