@@ -66,7 +66,7 @@ int CommandLineOptions::parse_args(int argc, char **argv) {
 			/* some debugging */
 			std::cout << "option '" <<  optionName << "' ";
 			if (optarg) {
-				std::cout << "with arg " <<  optarg;
+				std::cout << "with arg " <<  optarg << " strOptArg:" << strOptArg;
 			}
 			if (retPair.second == false)
 				std::cout << "element '" << optionName << "' already existed";
