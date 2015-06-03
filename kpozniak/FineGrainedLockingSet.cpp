@@ -57,9 +57,8 @@ bool FineGrainedLockingSet::contains(long item) {
 Window FineGrainedLockingSet::find(long item) {
 	// Search for item or successor
 	Node* pred = head;
+	pred->lock();     //error in slides
 	Node* curr = pred->next;
-	// Exception safety for locks ignored for simplicity
-	pred->lock();
 	curr->lock();
 	while (curr->item < item) {
 		pred->unlock();

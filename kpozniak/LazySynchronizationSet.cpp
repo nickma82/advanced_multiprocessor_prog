@@ -10,8 +10,6 @@
 #include <mutex>
 #include "LazySynchronizationSet.h"
 
-#include <iostream>
-
 LazySynchronizationSet::LazySynchronizationSet() {
 	head = new LssNode(LONG_MIN, new LssNode(LONG_MAX, NULL));
 }

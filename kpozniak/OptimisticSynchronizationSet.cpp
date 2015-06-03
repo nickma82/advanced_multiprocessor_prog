@@ -27,7 +27,8 @@ Window OptimisticSynchronizationSet::find(long item) {
 		// Search for item or successor
 		Node* pred = head;
 		Node* curr = pred ->next;
-		while (curr ->item < item) { pred = curr;
+		while (curr->item < item) {
+			pred = curr;
 			curr = curr ->next;
 		}
 		Window w(pred , curr);
