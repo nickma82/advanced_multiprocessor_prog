@@ -81,7 +81,7 @@ private:
 	int tmpValue = -1;
 	std::map<std::string, std::string> _optionsMap;
 
-	void usage();
+	void printUsage();
 };
 
 #endif /* CMDLINEOPTIONS_H_ */

@@ -25,9 +25,9 @@ ReturnProxy CommandLineOptions::getValue(const std::string& key)  {
 }
 
 
-void CommandLineOptions::usage() {
+void CommandLineOptions::printUsage() {
 	std::cout << "Usage: " << std::endl;
-	std::cout << "valid arguments are:" << std::endl;
+	std::cout << "valid arguments are (please give at least one):" << std::endl;
 	std::cout << "\t --add --remove --random" << std::endl;
 
 	std::cout << "\t --implementation={FGL, OS, LS, LBS, REF}" << std::endl;
@@ -38,11 +38,9 @@ void CommandLineOptions::usage() {
 
 int CommandLineOptions::parse_args(int argc, char **argv) {
 	if(argc <= 1) {
-		usage();
+		printUsage();
 		return -1;
 	}
-
-//	size_t base_options = sizeof(long_options_common) / sizeof(option);
 
 	while (1) {
 		const char shortOps[] = "0:";
@@ -80,11 +78,11 @@ int CommandLineOptions::parse_args(int argc, char **argv) {
 		}
 		case '?':
 			/* getopt_long already printed an error message. */
-			usage();
+			printUsage();
 			return -1;
 		default:
 			std::cerr << "Unrecognized option: " << optChar << std::endl;
-			usage();
+			printUsage();
 			return -1;
 		}
 	}
