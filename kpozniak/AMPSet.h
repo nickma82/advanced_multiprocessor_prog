@@ -18,7 +18,6 @@ class AMPSet
 {
 
 public:
-	
 	//adds an item to the set
 	//returns true if successfull, false if the item already was in the set
 	virtual bool add(long item) = 0;
