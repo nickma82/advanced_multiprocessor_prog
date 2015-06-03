@@ -5,7 +5,7 @@
 #include <chrono>
 using namespace std::chrono;
 
-#define DURATION_BASE		std::chrono::microseconds
+#define DURATION_BASE		std::chrono::nanoseconds
 #define INVALID_TIMESPAN 	std::chrono::seconds(0)
 
 // http://stackoverflow.com/questions/8498300/allow-for-range-based-for-with-enum-classes
@@ -22,6 +22,9 @@ public:
 
 	/**
 	 * Starts the time measurement
+	 *
+	 * @note as a sideeffect timer_start() invalidates previously
+	 * measured timeSpans
 	 */
 	void time_start();
 

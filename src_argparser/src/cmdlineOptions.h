@@ -63,6 +63,7 @@ public:
 	 */
 	ReturnProxy getValue(const std::string& key);
 
+	void printUsage();
 private:
 	//see c++11 uniform initialization, note size must be given
 	const struct option long_options_common[7] {
@@ -80,8 +81,6 @@ private:
 
 	int tmpValue = -1;
 	std::map<std::string, std::string> _optionsMap;
-
-	void printUsage();
 };
 
 #endif /* CMDLINEOPTIONS_H_ */

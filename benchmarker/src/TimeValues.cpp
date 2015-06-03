@@ -8,7 +8,7 @@ void TimerValue::printValues() {}
 
 
 void ThreadTimerValue::printValues() {
-	std::cout << "time[us]:" << duration.count() << " type:" << timerType
+	std::cout << "time:" << duration.count() << " type:" << timerType
 			<< " id:" << threadID << std::endl;
 }
 
