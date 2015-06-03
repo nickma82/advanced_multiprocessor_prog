@@ -1,5 +1,6 @@
 #include "ValueAnalyser.h"
-
+#include <ostream>
+#include <iostream>
 
 void ValueAnalyser::addValueStore(const ValueStore &store) {
 		addValueStore(store, store.threadID);

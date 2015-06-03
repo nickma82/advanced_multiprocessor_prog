@@ -1,4 +1,5 @@
 #include "TimeValues.h"
+#include <iostream>
 
 TimerValue::TimerValue(const DURATION_BASE &duration, const TimerType &type) :
 	duration(duration), timerType(type) {}
