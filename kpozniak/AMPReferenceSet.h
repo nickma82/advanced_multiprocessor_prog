@@ -23,11 +23,11 @@ private:
 	std::set<long> set;
 
 public:
-	bool add(long item);
+	virtual bool add(long item);
 	
-	bool remove(long item);
+	virtual bool remove(long item);
 
-	bool contains(long item);
+	virtual bool contains(long item);
 
 };
 
