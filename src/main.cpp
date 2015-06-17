@@ -48,50 +48,54 @@ struct ThreadIOData {
 		rset(rset), n(n) {};
 };
 
-/**
- * removes or adds a block of data depending on the operationType.
- */
-void testAddRemoveBenchmarked(ThreadIOData *ioData, const TimerType operationType) {
-//		AMPSet *rset, size_t n, std::vector<long> *output) {
-	const size_t pseudoRandomValue = 10;
-	/*
-	 * Adds pseudoRandomValue times the same value
+
+class SetTestActions {
+public:
+	/**
+	 * removes or adds a block of data depending on the operationType.
 	 */
-	bool rc = false;
-	auto timer = StartStopTimer(operationType);
+	static void addRemove(ThreadIOData *ioData, const TimerType operationType) {
+	//		AMPSet *rset, size_t n, std::vector<long> *output) {
+		const size_t pseudoRandomValue = 10;
+		/*
+		 * Adds pseudoRandomValue times the same value
+		 */
+		bool rc = false;
+		auto timer = StartStopTimer(operationType);
 
-	for(size_t i=0; i<ioData->n; ++i) {
-		for(size_t j=0; j<pseudoRandomValue; ++j) {
+		for(size_t i=0; i<ioData->n; ++i) {
+			for(size_t j=0; j<pseudoRandomValue; ++j) {
 
-			timer.time_start();
-			// differ between insert and remove
-			if(operationType == ID_INSERT) {
-				rc = ioData->rset.add(i);
-			} else if (operationType == ID_REMOVE) {
-				rc = ioData->rset.remove(i);
-			}
-			timer.time_stop();
-			ioData->valueStore.addTimeMeasurement(timer);
+				timer.time_start();
+				// differ between insert and remove
+				if(operationType == ID_INSERT) {
+					rc = ioData->rset.add(i);
+				} else if (operationType == ID_REMOVE) {
+					rc = ioData->rset.remove(i);
+				}
+				timer.time_stop();
+				ioData->valueStore.addTimeMeasurement(timer);
 
-			/* evaluation part */
-			if(rc) {
-				ioData->resultValues.push_back(i);
+				/* evaluation part */
+				if(rc) {
+					ioData->resultValues.push_back(i);
+				}
 			}
 		}
 	}
-}
 
 
-void containsTest(ThreadIOData *ioData, bool expected) {
-	for(size_t i=0; i < ioData->n; ++i) {
-		if(ioData->rset.contains(i) == expected)
-			continue;
+	static void contains(ThreadIOData *ioData, bool expected) {
+		for(size_t i=0; i < ioData->n; ++i) {
+			if(ioData->rset.contains(i) == expected)
+				continue;
 
-		std::cout << "wrong contain!! \n";
-		exit(EXIT_FAILURE);
+			std::cout << "wrong contain!! \n";
+			exit(EXIT_FAILURE);
+		}
+
 	}
-
-}
+};
 
 void test(AMPSet *set, const size_t threads, const int iterations) {
 
@@ -119,7 +123,7 @@ void test(AMPSet *set, const size_t threads, const int iterations) {
 	std::vector<std::thread> threadVector1(threads);
 
 	for(size_t i=0; i<threads; ++i) {
-		threadVector1[i] = std::thread( testAddRemoveBenchmarked, &insertIOData[i], ID_INSERT );
+		threadVector1[i] = std::thread( SetTestActions::addRemove, &insertIOData[i], ID_INSERT );
 	}
 	for(size_t i=0; i<threads; ++i) {
 		threadVector1.at(i).join();
@@ -155,7 +159,7 @@ void test(AMPSet *set, const size_t threads, const int iterations) {
 	std::vector<std::thread> threadVector2(threads);
 
 	for(size_t i=0; i<threads; ++i) {
-		threadVector2.at(i) = std::thread (containsTest, &containsIOData[i], true);
+		threadVector2.at(i) = std::thread ( SetTestActions::contains, &containsIOData[i], true);
 	}
 	for(size_t i=0; i<threads; ++i) {
 		threadVector2.at(i).join();
@@ -172,7 +176,7 @@ void test(AMPSet *set, const size_t threads, const int iterations) {
 	std::vector<ThreadIOData> remove_ioData(threads, ThreadIOData(*set, iterations));
 
 	for(size_t i=0; i<threads; ++i) {
-		threadVector3[i] = std::thread( testAddRemoveBenchmarked, &remove_ioData[i], ID_REMOVE );
+		threadVector3[i] = std::thread( SetTestActions::addRemove, &remove_ioData[i], ID_REMOVE );
 	}
 
 	for(size_t i=0; i<threads; ++i) {
@@ -204,7 +208,7 @@ void test(AMPSet *set, const size_t threads, const int iterations) {
 	std::vector<std::thread> threadVector4(threads);
 
 	for(size_t i=0; i<threads; ++i) {
-		threadVector4.at(i) = std::thread (containsTest, &containsNothingIOData[i], false);
+		threadVector4.at(i) = std::thread ( SetTestActions::contains, &containsNothingIOData[i], false);
 	}
 	for(size_t i=0; i<threads; ++i) {
 		threadVector4.at(i).join();
