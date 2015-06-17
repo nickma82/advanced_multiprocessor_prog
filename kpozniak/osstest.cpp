@@ -1,11 +1,9 @@
 /*
- * referencetest.cpp
+ * osstest.cpp
  *
  * Advanced Multiprocessor Programming
  * Author: kpozniak
  *
- *	compile with:
- *  g++ -std=c++11 -Wall -O3 AMPReferenceSet.cpp referencetest.cpp -o test
  *
  */
 

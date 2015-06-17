@@ -19,10 +19,6 @@ public:
 	long item;
 	LfsNode* next;
 	LfsNode(long item, LfsNode* next);
-	bool isMarked();
-	void mark();
-	void unmark();
-	LfsNode* getNext();
 };
 
 class LfsWindow {
@@ -40,6 +36,9 @@ protected:
 	
 private:	
 	LfsWindow find(long l);
+	LfsNode* getPointer(LfsNode* n);
+	LfsNode* mark(LfsNode* n);
+	bool isMarked(LfsNode* n);
 	
 public:
 	LockFreeSet();
@@ -50,11 +49,6 @@ public:
 	bool remove(long item);
 	
 	bool contains(long item);
-	
-	LfsNode* getPointer(LfsNode* n);
-	LfsNode* mark(LfsNode* n);
-	LfsNode* unmark(LfsNode* n);
-	bool isMarked(LfsNode* n);
 };
 
 
