@@ -1,4 +1,4 @@
-CXXFLAGS= -O2 -g -Wall -std=c++0x -fmessage-length=0
+CXXFLAGS= -O2 -g -Wall -std=c++0x -fmessage-length=0 -m64
 CPPFLAGS= $(INC_PARAMS)
 
 OBJS =		src/main.o \
