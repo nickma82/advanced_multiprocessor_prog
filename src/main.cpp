@@ -38,7 +38,7 @@ void addTest(AMPSet *rs, int n, std::vector<long> *vec)
 struct ThreadIOData {
 	//input data
 	AMPSet 		&rset;
-	size_t		n;
+	size_t		n; //iterations count
 
 	// output data
 	std::vector<int> 	resultValues;
@@ -71,28 +71,24 @@ void testAddRemoveBenchmarked(ThreadIOData *ioData, const TimerType operationTyp
 				rc = ioData->rset.remove(i);
 			}
 			timer.time_stop();
+			ioData->valueStore.addTimeMeasurement(timer);
 
 			/* evaluation part */
 			if(rc) {
 				ioData->resultValues.push_back(i);
 			}
-			ioData->valueStore.addTimeMeasurement(timer);
 		}
 	}
 }
 
-void containsTest(AMPSet *rs, int n, bool expected)
-{
-	long i=0;
 
-	while(i<n) {
+void containsTest(ThreadIOData *ioData, bool expected) {
+	for(size_t i=0; i < ioData->n; ++i) {
+		if(ioData->rset.contains(i) == expected)
+			continue;
 
-		if(rs->contains(i) != expected) {
-			std::cout << "wrong contain!! \n";
-			exit(EXIT_FAILURE);
-		}
-
-		i++;
+		std::cout << "wrong contain!! \n";
+		exit(EXIT_FAILURE);
 	}
 
 }
@@ -100,7 +96,6 @@ void containsTest(AMPSet *rs, int n, bool expected)
 void test(AMPSet *set, const size_t threads, const int iterations) {
 
 	//run some basic functionality tests on one thread
-
 	if(set->add(5)!=true) exit(EXIT_FAILURE);
 	if(set->add(5)!=false) exit(EXIT_FAILURE);
 	if(set->add(6)!=true) exit(EXIT_FAILURE);
@@ -118,29 +113,29 @@ void test(AMPSet *set, const size_t threads, const int iterations) {
 	if(set->contains(1)!=false) exit(EXIT_FAILURE);
 
 
-//	//run add only test on multiple threads
+	//run add only test on multiple threads
+	ValueAnalyser insert_analyser;
+	std::vector<ThreadIOData> insertIOData(threads, ThreadIOData(*set, iterations));
 	std::vector<std::thread> threadVector1(threads);
-	std::vector<ThreadIOData> ioData(threads, ThreadIOData(*set, iterations));
-	ValueAnalyser analyser_insert;
 
 	for(size_t i=0; i<threads; ++i) {
-		threadVector1[i] = std::thread( testAddRemoveBenchmarked, &ioData[i], ID_INSERT );
+		threadVector1[i] = std::thread( testAddRemoveBenchmarked, &insertIOData[i], ID_INSERT );
 	}
-
 	for(size_t i=0; i<threads; ++i) {
 		threadVector1.at(i).join();
 
 		//feed ValueStore
-		analyser_insert.addValueStore(ioData[i].valueStore, i);
+		insert_analyser.addValueStore(insertIOData[i].valueStore, i);
 	}
-	analyser_insert.outputToFile("/tmp/results_inserting");
+	insert_analyser.outputToFile("/tmp/results_inserting");
 
 
 	//check if every element was only added once
+	//  runtime is O(n*threads) which is linear
 	std::set<int> checkDuplicates1;
 
 	for(size_t i=0; i<threads; ++i) {
-		std::vector<int> vector = ioData[i].resultValues;
+		std::vector<int> vector = insertIOData[i].resultValues;
 
 		while(!vector.empty()) {
 			long item = vector.back();
@@ -155,41 +150,44 @@ void test(AMPSet *set, const size_t threads, const int iterations) {
 
 
 	//check if the right elements are contained in the set
+	ValueAnalyser contains_analyser;
+	std::vector<ThreadIOData> containsIOData(threads, ThreadIOData(*set, iterations));
 	std::vector<std::thread> threadVector2(threads);
 
 	for(size_t i=0; i<threads; ++i) {
-		threadVector2.at(i) = std::thread (containsTest, set, iterations, true);
+		threadVector2.at(i) = std::thread (containsTest, &containsIOData[i], true);
 	}
-
 	for(size_t i=0; i<threads; ++i) {
 		threadVector2.at(i).join();
+
+		//feed ValueStore
+		contains_analyser.addValueStore(insertIOData[i].valueStore, i);
 	}
+	contains_analyser.outputToFile("/tmp/results_contains");
 
 
 	//remove all elements again
-
+	ValueAnalyser remove_analyser;
 	std::vector<std::thread> threadVector3(threads);
-	std::vector<ThreadIOData> ioData_rm(threads, ThreadIOData(*set, iterations));
-	ValueAnalyser analyser_remove;
+	std::vector<ThreadIOData> remove_ioData(threads, ThreadIOData(*set, iterations));
 
 	for(size_t i=0; i<threads; ++i) {
-		threadVector3[i] = std::thread( testAddRemoveBenchmarked, &ioData_rm[i], ID_REMOVE );
-//		threadVector3.at(i) = std::thread (removeTest, set, iterations, &checkVectors3.at(i));
+		threadVector3[i] = std::thread( testAddRemoveBenchmarked, &remove_ioData[i], ID_REMOVE );
 	}
 
 	for(size_t i=0; i<threads; ++i) {
 		threadVector3.at(i).join();
 
 		//feed ValueStore
-		analyser_remove.addValueStore(ioData_rm[i].valueStore, i);
+		remove_analyser.addValueStore(remove_ioData[i].valueStore, i);
 	}
-	analyser_remove.outputToFile("/tmp/results_removing");
+	remove_analyser.outputToFile("/tmp/results_removing");
 
 	//check if every element was only added once
 	std::set<int> checkDuplicates3;
 
 	for(size_t i=0; i<threads; ++i) {
-		std::vector<int> vector = ioData_rm[i].resultValues;
+		std::vector<int> vector = remove_ioData[i].resultValues;
 		while(!vector.empty()) {
 			long item = vector.back();
 			vector.pop_back();
@@ -202,13 +200,12 @@ void test(AMPSet *set, const size_t threads, const int iterations) {
 	}
 
 	//check if the set is now empty
-
+	std::vector<ThreadIOData> containsNothingIOData(threads, ThreadIOData(*set, iterations));
 	std::vector<std::thread> threadVector4(threads);
 
 	for(size_t i=0; i<threads; ++i) {
-		threadVector4.at(i) = std::thread (containsTest, set, iterations, false);
+		threadVector4.at(i) = std::thread (containsTest, &containsNothingIOData[i], false);
 	}
-
 	for(size_t i=0; i<threads; ++i) {
 		threadVector4.at(i).join();
 	}
