@@ -13,10 +13,14 @@
 #include <vector>
 #include <set>
 #include <stdlib.h>
+
 #include "OptimisticSynchronizationSet.h"
 #include "FineGrainedLockingSet.h"
+#include "LazySynchronizationSet.h"
+#include "LockFreeSet.h"
 #include "AMPReferenceSet.h"
 #include "AMPSet.h"
+#include "cmdlineOptions.h"
 
 
 
@@ -61,6 +65,40 @@ void removeTest(AMPSet *rs, int n, std::vector<long> *vec)
 			if(rs->remove(i)) vec->push_back(i);
 			j++;
 		}
+		i++;
+	}
+	
+}
+
+void mixedAdd(AMPSet *rs, long id, int n, std::vector<long> *vec) {
+	
+	int i = 0;
+	
+	while(i<n) {
+		
+		long j=0;
+		while(j<10) {
+			if(rs->add(j)) vec->push_back(j);
+			j++;
+		}
+		
+		i++;
+	}
+	
+}
+
+void mixedRemove(AMPSet *rs, long id, int n, std::vector<long> *vec) {
+	
+	int i = 0;
+	
+	while(i<n) {
+		
+		long j=0;
+		while(j<10) {
+			if(rs->remove(j)) vec->push_back(j);
+			j++;
+		}
+		
 		i++;
 	}
 	
@@ -111,7 +149,7 @@ void test(AMPSet *set, int threads, int iterations) {
 			vector.pop_back();
 			auto result = checkDuplicates1.insert(item);
 			if(!result.second) {
-				std::cout << "duplicate add!! \n";
+				std::cout << "duplicate add!! " << item << " was added twice!" << std::endl;
 				exit(1);
 			}
 		}
@@ -144,7 +182,7 @@ void test(AMPSet *set, int threads, int iterations) {
 		threadVector3.at(i).join();
 	}
 	
-	//check if every element was only added once
+	//check if every element was only removed once
 	
 	std::set<long> checkDuplicates3;
 	
@@ -155,7 +193,7 @@ void test(AMPSet *set, int threads, int iterations) {
 			vector.pop_back();
 			auto result = checkDuplicates3.insert(item);
 			if(!result.second) {
-				std::cout << "wrong remove!! \n";
+				std::cout << "wrong remove!! " << item << " was removed twice!" << std::endl;
 				exit(1);
 			}
 		}
@@ -178,18 +216,46 @@ void test(AMPSet *set, int threads, int iterations) {
 	
 }
 
-int main() 
+int main(int argc, char **argv) 
 {
 	
-	AMPReferenceSet rs1;
-	test(&rs1, 50, 1000);
+	CommandLineOptions cmdOption;
+	int rc = cmdOption.parse_args(argc, argv);
+	if (rc < 0)
+		return -1;
+	
+	int n, t;
+	
+	if((int)cmdOption.getValue("threadCount")) {
+		t = cmdOption.getValue("threadCount");
+	} else {
+		t = 10;
+	}
+	
+	if((int)cmdOption.getValue("repeatCycles")) {
+		n = cmdOption.getValue("repeatCycles");
+	} else {
+		n = 100;
+	}
+	
+	std::cout << n << " " << t << std::endl;
+
+	/*AMPReferenceSet rs1;
+	test(&rs1, t, n);
 	
 	FineGrainedLockingSet fgls1;
-	test(&fgls1, 50, 1000);
+	test(&fgls1, t, n);
 	
 	OptimisticSynchronizationSet oss1;
-	test(&oss1, 50, 1000);	
+	test(&oss1, t, n);	
 	
+	
+	LazySynchronizationSet lss1;
+	test(&lss1, t, n);
+	*/
+	
+	LockFreeSet lfs1;
+	test(&lfs1, t, n);
 	
 	return 0;
 }

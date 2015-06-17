@@ -9,7 +9,6 @@
 #include <climits>
 #include <mutex>
 #include "LockFreeSet.h"
-#include <iostream>
 
 LockFreeSet::LockFreeSet() {
 	head = new LfsNode(LONG_MIN, new LfsNode(LONG_MAX, NULL));
@@ -18,7 +17,7 @@ LockFreeSet::LockFreeSet() {
 LockFreeSet::~LockFreeSet() {
 	LfsNode* node = head;
 	while(node != NULL) {
-		LfsNode* next = node->getNext();
+		LfsNode* next = getPointer(node->next);
 		delete node;
 		node = next;
 	}
@@ -35,7 +34,7 @@ bool LockFreeSet::add(long item) {
 			return false;
 		}
 		
-		n->next = unmark(curr);
+		n->next = getPointer(curr); //unmark
 		
 		if (__sync_bool_compare_and_swap(&(getPointer(pred)->next), curr, n))
 			return true;
@@ -50,19 +49,25 @@ bool LockFreeSet::remove(long item) {
 		}
 		
 		LfsNode *next = getPointer(w.curr)->next;
-		LfsNode *markedsucc = mark(next);
+		
+		if(isMarked(next)){  //next may be marked by another thread!
+			continue;
+		}
 		
 		// mark as deleted, verify and set
+		LfsNode *markedsucc = mark(next);
+	
 		if (!__sync_bool_compare_and_swap(&(getPointer(w.curr)->next), next, markedsucc)) {
 			continue;
 		}
 		
+		if(isMarked(w.curr)) { //mark next pointer if curr was marked, otherwise a mark could get overridden
+		    next = mark(next);
+		}		
+
 		// unlink curr
-		if(isMarked(w.curr)) {
-		next = mark(next);
-		}
+		__sync_bool_compare_and_swap(&(getPointer(w.pred)->next), w.curr, next);
 		
-		std::cout << __sync_bool_compare_and_swap(&(getPointer(w.pred)->next), w.curr, next);
 		return true;
 	}
 }
@@ -71,9 +76,8 @@ bool LockFreeSet::contains(long item) {
 	// same as lazy implementation
 	// except marked flag is part of next pointer
 	LfsNode* n = head;
-	while (n->item < item) n = n->getNext();
+	while (n->item < item) n = getPointer(n->next);
 	return (n->item == item && !isMarked(n->next));
-	
 }
 
 LfsWindow LockFreeSet::find(long item) {
@@ -81,7 +85,7 @@ LfsWindow LockFreeSet::find(long item) {
 retry:
 	while (true) {
 		LfsNode* pred_withMark = head;   
-		LfsNode* curr_withMark = pred_withMark->next; //dereferencing head should be safe
+		LfsNode* curr_withMark = pred_withMark->next; //dereferencing head is safe, can not be marked
 		while (true) {
 			LfsNode *succ_withMark = getPointer(curr_withMark)->next;
 			while (isMarked(succ_withMark)) {
@@ -112,34 +116,15 @@ LfsNode::LfsNode(long item, LfsNode* next){
 	this->next = next;
 }
 
-bool LfsNode::isMarked() {
-	return ((unsigned long)next) > 0x8000000000000000;
-}
 
-void LfsNode::mark() {
-	next = (LfsNode*)((unsigned long)next bitor 0x8000000000000000);
-}
-
-void LfsNode::unmark() {
-	next = (LfsNode*)((unsigned long)next bitand 0x7fffffffffffffff);
-}
-
-LfsNode* LfsNode::getNext() {
-	return (LfsNode*)((unsigned long)next bitand 0x7fffffffffffffff);
-}
-
-LfsNode* LockFreeSet::getPointer(LfsNode* n) {
+inline LfsNode* LockFreeSet::getPointer(LfsNode* n) {
 	return (LfsNode*)((unsigned long)n bitand 0x7fffffffffffffff);
 }
 
-LfsNode* LockFreeSet::mark(LfsNode* n) {
+inline LfsNode* LockFreeSet::mark(LfsNode* n) {
 	return (LfsNode*)((unsigned long)n bitor 0x8000000000000000);
 }
 
-LfsNode* LockFreeSet::unmark(LfsNode* n) {
-	return (LfsNode*)((unsigned long)n bitand 0x7fffffffffffffff);
-}
-
-bool LockFreeSet::isMarked(LfsNode* n) {
+inline bool LockFreeSet::isMarked(LfsNode* n) {
 	return ((unsigned long)n) > 0x8000000000000000;
 }
