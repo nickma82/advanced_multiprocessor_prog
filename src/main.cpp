@@ -97,29 +97,29 @@ public:
 	}
 };
 
-void test(AMPSet *set, const size_t threads, const int iterations) {
+void test(AMPSet &set, const size_t threads, const int iterations) {
 
 	//run some basic functionality tests on one thread
-	if(set->add(5)!=true) exit(EXIT_FAILURE);
-	if(set->add(5)!=false) exit(EXIT_FAILURE);
-	if(set->add(6)!=true) exit(EXIT_FAILURE);
-	if(set->add(7)!=true) exit(EXIT_FAILURE);
-	if(set->add(8)!=true) exit(EXIT_FAILURE);
-	if(set->add(1)!=true) exit(EXIT_FAILURE);
-	if(set->add(8)!=false) exit(EXIT_FAILURE);
-	if(set->add(1)!=false) exit(EXIT_FAILURE);
+	if(set.add(5)!=true) exit(EXIT_FAILURE);
+	if(set.add(5)!=false) exit(EXIT_FAILURE);
+	if(set.add(6)!=true) exit(EXIT_FAILURE);
+	if(set.add(7)!=true) exit(EXIT_FAILURE);
+	if(set.add(8)!=true) exit(EXIT_FAILURE);
+	if(set.add(1)!=true) exit(EXIT_FAILURE);
+	if(set.add(8)!=false) exit(EXIT_FAILURE);
+	if(set.add(1)!=false) exit(EXIT_FAILURE);
 
-	if(set->contains(1)!=true) exit(EXIT_FAILURE);
+	if(set.contains(1)!=true) exit(EXIT_FAILURE);
 
-	if(set->remove(1)!=true) exit(EXIT_FAILURE);
-	if(set->remove(1)!=false) exit(EXIT_FAILURE);
+	if(set.remove(1)!=true) exit(EXIT_FAILURE);
+	if(set.remove(1)!=false) exit(EXIT_FAILURE);
 
-	if(set->contains(1)!=false) exit(EXIT_FAILURE);
+	if(set.contains(1)!=false) exit(EXIT_FAILURE);
 
 
 	//run add only test on multiple threads
 	ValueAnalyser insert_analyser;
-	std::vector<ThreadIOData> insertIOData(threads, ThreadIOData(*set, iterations));
+	std::vector<ThreadIOData> insertIOData(threads, ThreadIOData(set, iterations));
 	std::vector<std::thread> threadVector1(threads);
 
 	for(size_t i=0; i<threads; ++i) {
@@ -155,7 +155,7 @@ void test(AMPSet *set, const size_t threads, const int iterations) {
 
 	//check if the right elements are contained in the set
 	ValueAnalyser contains_analyser;
-	std::vector<ThreadIOData> containsIOData(threads, ThreadIOData(*set, iterations));
+	std::vector<ThreadIOData> containsIOData(threads, ThreadIOData(set, iterations));
 	std::vector<std::thread> threadVector2(threads);
 
 	for(size_t i=0; i<threads; ++i) {
@@ -173,7 +173,7 @@ void test(AMPSet *set, const size_t threads, const int iterations) {
 	//remove all elements again
 	ValueAnalyser remove_analyser;
 	std::vector<std::thread> threadVector3(threads);
-	std::vector<ThreadIOData> remove_ioData(threads, ThreadIOData(*set, iterations));
+	std::vector<ThreadIOData> remove_ioData(threads, ThreadIOData(set, iterations));
 
 	for(size_t i=0; i<threads; ++i) {
 		threadVector3[i] = std::thread( SetTestActions::addRemove, &remove_ioData[i], ID_REMOVE );
@@ -204,7 +204,7 @@ void test(AMPSet *set, const size_t threads, const int iterations) {
 	}
 
 	//check if the set is now empty
-	std::vector<ThreadIOData> containsNothingIOData(threads, ThreadIOData(*set, iterations));
+	std::vector<ThreadIOData> containsNothingIOData(threads, ThreadIOData(set, iterations));
 	std::vector<std::thread> threadVector4(threads);
 
 	for(size_t i=0; i<threads; ++i) {
@@ -231,15 +231,15 @@ int main (int argc, char **argv) {
 	if(implementation == "REF") {
 		std::cout << "starting AMPReferenceSet" << std::endl;
 		AMPReferenceSet rs1;
-		test(&rs1, threadCount, repeatCycles);
+		test(rs1, threadCount, repeatCycles);
 	} else if(implementation == "FGL") {
 		std::cout << "starting FineGrainedLockingSet" << std::endl;
 		FineGrainedLockingSet fgls1;
-		test(&fgls1, threadCount, repeatCycles);
+		test(fgls1, threadCount, repeatCycles);
 	} else if(implementation == "OS") {
 		std::cout << "starting OptimisticSynchronizationSet" << std::endl;
 		OptimisticSynchronizationSet oss1;
-		test(&oss1, threadCount, repeatCycles);
+		test(oss1, threadCount, repeatCycles);
 	} else {
 		std::cout << "implementation parameter '" << implementation << "' not recognised" << std::endl;
 		std::cout << "please add at least --implementation=<option>" << std::endl;
