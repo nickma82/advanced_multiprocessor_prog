@@ -1,14 +1,18 @@
 #include "ValueAnalyser.h"
 #include <ostream>
 #include <iostream>
+#include <stdexcept>
 
 void ValueAnalyser::addValueStore(const ValueStore &store) {
-		addValueStore(store, store.threadID);
-	}
+	if(!store.threadID)
+		throw new std::runtime_error("tried to obtain the threadID from the ValueStore, but it was zero");
+	addValueStore(store, store.threadID);
+}
 
 void ValueAnalyser::addValueStore(const ValueStore &store, const unsigned int threadID) {
-		std::cout << "adding timerStor with:" << (uint16_t)store.getStoredValueCount()
-				<< " values, from threadID:" << threadID << std::endl;
+		std::cout << "add(" << (uint16_t)store.getStoredValueCount()
+				<< " from thr:" << threadID << ") ";
+
 		for(auto each: store.measuredValues) {
 			auto newEl = ThreadTimerValue(each, threadID);
 			_threadedTimerValues.push_back(newEl);
@@ -16,10 +20,11 @@ void ValueAnalyser::addValueStore(const ValueStore &store, const unsigned int th
 	}
 
 void ValueAnalyser::outputToFile(const std::string &pathToFile) {
-	std::cout << "going to open file '" << pathToFile
+	std::cout << "\n" << "going to open file '" << pathToFile
 			<< "' to write '" << _threadedTimerValues.size()
 			<< "' values to it" << std::endl;
 
+	// opening the file
 	std::ofstream myfile;
 	myfile.open(pathToFile);
 
@@ -34,5 +39,6 @@ void ValueAnalyser::outputToFile(const std::string &pathToFile) {
 		myfile << each << std::endl;
 	}
 
+	// saving to the file
 	myfile.close();
 }
