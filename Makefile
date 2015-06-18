@@ -1,4 +1,4 @@
-CXXFLAGS= -O2 -g -Wall -std=c++0x -fmessage-length=0 -m64
+CXXFLAGS= -O3 -Wall -std=c++11 -m64
 CPPFLAGS= $(INC_PARAMS)
 
 OBJS =		src/main.o \
@@ -10,9 +10,16 @@ OBJS =		src/main.o \
 		kpozniak/AMPReferenceSet.o \
 		kpozniak/FineGrainedLockingSet.o \
 		kpozniak/OptimisticSynchronizationSet.o \
-		kpozniak/LazySynchronizationSet.o
-
+		kpozniak/LazySynchronizationSet.o \
+		kpozniak/LockFreeSet.o
+		
 LIBS = -pthread
+
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+    LIBS = -mmacosx-version-min=10.6
+    CXX = g++
+endif
 
 INCLUDE_DIR = benchmarker/src/ kpozniak/ src_argparser/src/
 # creating the include directory parameter list
@@ -29,4 +36,4 @@ $(TARGET):	$(OBJS)
 all:	$(TARGET)
 
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(OBJS) $(TARGET)	

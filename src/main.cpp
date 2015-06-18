@@ -12,6 +12,8 @@
 #include "TimeValues.h"
 #include "ValueStore.h"
 #include "OptimisticSynchronizationSet.h"
+#include "LazySynchronizationSet.h"
+#include "LockFreeSet.h"
 #include "FineGrainedLockingSet.h"
 #include "AMPReferenceSet.h"
 #include "AMPSet.h"
@@ -255,12 +257,20 @@ int main (int argc, char **argv) {
 		std::cout << "starting FineGrainedLockingSet" << std::endl;
 		FineGrainedLockingSet fgls1;
 		test(fgls1, threadCount, repeatCycles);
-	} else if(implementation == "OS") {
+	}  else if(implementation == "OS") {
 		std::cout << "starting OptimisticSynchronizationSet" << std::endl;
-		OptimisticSynchronizationSet oss1;
+		OptimisticSynchronizationSet fgls1;
+		test(fgls1, threadCount, repeatCycles);
+	}  else if(implementation == "LS") {
+		std::cout << "starting LazySynchronizationSet" << std::endl;
+		LazySynchronizationSet fgls1;
+		test(fgls1, threadCount, repeatCycles);
+	} else if(implementation == "LF") {
+		std::cout << "starting LockFreeSet" << std::endl;
+		LockFreeSet oss1;
 		test(oss1, threadCount, repeatCycles);
 	} else {
-		std::cout << "implementation parameter '" << implementation << "' not recognised" << std::endl;
+		std::cout << "implementation parameter '" << implementation << "' not recognized" << std::endl;
 		std::cout << "please add at least --implementation=<option>" << std::endl;
 		cmdOption.printUsage();
 	}

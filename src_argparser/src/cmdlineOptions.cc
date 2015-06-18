@@ -30,7 +30,7 @@ void CommandLineOptions::printUsage() {
 	std::cout << "valid arguments are (please give at least one):" << std::endl;
 	std::cout << "\t --add --remove --random" << std::endl;
 
-	std::cout << "\t --implementation={FGL, OS, LS, LBS, REF}" << std::endl;
+	std::cout << "\t --implementation={FGL, OS, LS, LF, REF}" << std::endl;
 	std::cout << "\t --threadCount=[1,512]" << std::endl;
 	std::cout << "\t --repeatCycles=[0,maxof(int)]" << std::endl;
 }
