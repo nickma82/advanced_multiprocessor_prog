@@ -41,8 +41,8 @@ struct ThreadIOData {
 	size_t		n; //iterations count
 
 	// output data
-	std::vector<int> 	resultValues;
-	ValueStore 			valueStore;
+	std::vector<int> 	resultValues; //for duplications checks only
+	ValueStore 			valueStore;  //for timer measurements
 
 	ThreadIOData(AMPSet &rset, size_t n) :
 		rset(rset), n(n) {};
@@ -55,7 +55,6 @@ public:
 	 * removes or adds a block of data depending on the operationType.
 	 */
 	static void addRemove(ThreadIOData *ioData, const TimerType operationType) {
-	//		AMPSet *rset, size_t n, std::vector<long> *output) {
 		const size_t pseudoRandomValue = 10;
 		/*
 		 * Adds pseudoRandomValue times the same value
@@ -76,7 +75,7 @@ public:
 				timer.time_stop();
 				ioData->valueStore.addTimeMeasurement(timer);
 
-				/* evaluation part */
+				/* evaluation part, save to result values */
 				if(rc) {
 					ioData->resultValues.push_back(i);
 				}
@@ -85,9 +84,18 @@ public:
 	}
 
 
-	static void contains(ThreadIOData *ioData, bool expected) {
+	static void contains(ThreadIOData *ioData, const bool expected) {
+		auto timer = StartStopTimer(ID_CONTAINS);
+
+		//@note no need to fill ioData->resultValues because we arent going to
+		// check for duplicated contains-checks
 		for(size_t i=0; i < ioData->n; ++i) {
-			if(ioData->rset.contains(i) == expected)
+			timer.time_start();
+			auto contains = ioData->rset.contains(i);
+			timer.time_stop();
+			ioData->valueStore.addTimeMeasurement(timer);
+
+			if(contains == expected)
 				continue;
 
 			std::cout << "wrong contain!! \n";
@@ -223,6 +231,7 @@ int main (int argc, char **argv) {
 	if (rc < 0)
 		return EXIT_FAILURE;
 
+	// get user values. if not set, set to default
 	const int threadCount =  cmdOption.getValue("threadCount")  ? cmdOption.getValue("threadCount")  : 50;
 	const int repeatCycles = cmdOption.getValue("repeatCycles") ? cmdOption.getValue("repeatCycles") : 1000;
 	//options are: FGL, OS, LS, LBS, REF

@@ -24,7 +24,8 @@ public:
 
 
 	/**
-	 * Method for instantiation with a timer measuremnt
+	 * Adds a measured time with a timer measuremnt
+	 * @pre timer has to be stoped
 	 */
 	void addTimeMeasurement(StartStopTimer &measurement);
 
