@@ -10,7 +10,8 @@ OBJS =		src/main.o \
 		kpozniak/AMPReferenceSet.o \
 		kpozniak/FineGrainedLockingSet.o \
 		kpozniak/OptimisticSynchronizationSet.o \
-		kpozniak/LazySynchronizationSet.o
+		kpozniak/LazySynchronizationSet.o \
+		kpozniak/LockFreeSet.o
 
 LIBS = -pthread
 
