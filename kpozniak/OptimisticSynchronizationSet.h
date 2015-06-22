@@ -9,7 +9,6 @@
 #ifndef AMP_OPTIMISTIC_SYNCHRONIZATION_SET
 #define AMP_OPTIMISTIC_SYNCHRONIZATION_SET
 
-#include <mutex>
 #include "FineGrainedLockingSet.h"
 
 class OptimisticSynchronizationSet: public FineGrainedLockingSet
