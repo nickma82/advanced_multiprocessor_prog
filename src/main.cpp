@@ -6,6 +6,7 @@
 #include <set>
 #include <stdlib.h>
 #include <algorithm>
+#include <memory>
 
 #include "ValueAnalyser.h"
 #include "TimeMeasurement.h"
@@ -249,33 +250,29 @@ int main (int argc, char **argv) {
 	//options are: FGL, OS, LS, LBS, REF
 	const std::string implementation = cmdOption.getValue("implementation");
 
+	// Set* selector
+	std::unique_ptr<AMPSet> targetSet;
 	if(implementation == "REF") {
-		std::cout << "starting AMPReferenceSet" << std::endl;
-		AMPReferenceSet rs1;
-		test(rs1, threadCount, repeatCycles);
+		targetSet.reset(new AMPReferenceSet);
 	} else if(implementation == "FGL") {
-		std::cout << "starting FineGrainedLockingSet" << std::endl;
-		FineGrainedLockingSet fgls1;
-		test(fgls1, threadCount, repeatCycles);
+		targetSet.reset(new FineGrainedLockingSet);
 	}  else if(implementation == "OS") {
-		std::cout << "starting OptimisticSynchronizationSet" << std::endl;
-		OptimisticSynchronizationSet fgls1;
-		test(fgls1, threadCount, repeatCycles);
+		targetSet.reset(new OptimisticSynchronizationSet);
 	}  else if(implementation == "LS") {
-		std::cout << "starting LazySynchronizationSet" << std::endl;
-		LazySynchronizationSet fgls1;
-		test(fgls1, threadCount, repeatCycles);
+		targetSet.reset(new LazySynchronizationSet);
 	} else if(implementation == "LF") {
-		std::cout << "starting LockFreeSet" << std::endl;
-		LockFreeSet oss1;
-		test(oss1, threadCount, repeatCycles);
+		targetSet.reset(new LockFreeSet);
 	} else {
 		std::cout << "implementation parameter '" << implementation << "' not recognized" << std::endl;
 		std::cout << "please add at least --implementation=<option>" << std::endl;
 		cmdOption.printUsage();
 	}
 
-
+	// execute set tests
+	if(targetSet.get() != nullptr) {
+		std::cout << "starting implementation:" << implementation << std::endl;
+		test(*targetSet, threadCount, repeatCycles);
+	}
 
 
 
