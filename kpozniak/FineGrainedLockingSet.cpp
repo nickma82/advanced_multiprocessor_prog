@@ -24,7 +24,7 @@ FineGrainedLockingSet::~FineGrainedLockingSet() {
 }
 
 bool FineGrainedLockingSet::add(long item) {
-	Window w = find(item);
+	Window <Node> w = find(item);
 	if (item == w.curr->item) {
 		w.unlock();
 		return false;
@@ -36,7 +36,7 @@ bool FineGrainedLockingSet::add(long item) {
 }
 
 bool FineGrainedLockingSet::remove(long item) {
-	Window w = find(item);
+	Window <Node> w = find(item);
 	if (item != w.curr ->item) {
 		w.unlock();
 		return false;
@@ -54,7 +54,7 @@ bool FineGrainedLockingSet::contains(long item) {
 	return found;
 }
 
-Window FineGrainedLockingSet::find(long item) {
+Window <Node> FineGrainedLockingSet::find(long item) {
 	// Search for item or successor
 	Node* pred = head;
 	pred->lock();     //error in slides
@@ -66,7 +66,7 @@ Window FineGrainedLockingSet::find(long item) {
 		curr = curr->next;
 		curr->lock();
 	}
-	return Window(pred, curr);
+	return Window <Node> (pred, curr);
 	
 }
 
@@ -83,7 +83,7 @@ void Window::unlock() {
 	curr->unlock();
 }
 
-Window::Window(Node* pred, Node* curr) {
+Window::Window(T* pred, T* curr) {
 	this->pred = pred;
 	this->curr = curr;
 }

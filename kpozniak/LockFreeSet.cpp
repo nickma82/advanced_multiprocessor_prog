@@ -7,7 +7,6 @@
 */
 
 #include <climits>
-#include <mutex>
 #include "LockFreeSet.h"
 
 LockFreeSet::LockFreeSet() {

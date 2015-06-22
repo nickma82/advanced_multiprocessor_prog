@@ -57,7 +57,7 @@ bool LazySynchronizationSet::contains(long item) {
 	return n->item == item && !n->marked;
 }
 
-LssWindow LazySynchronizationSet::find(long item) {
+Window<LssNode> LazySynchronizationSet::find(long item) {
 	while (true) {
 		// Search for item or successor
 		LssNode* pred = head;
@@ -67,7 +67,7 @@ LssWindow LazySynchronizationSet::find(long item) {
 			curr = curr ->next;
 		}
 		
-		LssWindow w(pred, curr);
+		Window<LssNode> w(pred, curr);
 		pred->lock();
 		curr->lock();
 		if (validate(w)) return w;
@@ -76,32 +76,13 @@ LssWindow LazySynchronizationSet::find(long item) {
 	
 }
 
-bool LazySynchronizationSet::validate(LssWindow w) {
+bool LazySynchronizationSet::validate(Window<LssNode> w) {
 	return !w.pred->marked &&
 	!w.curr->marked &&
 	w.pred->next == w.curr;
 }
 
-void LssNode::lock() {
-	mutex.lock();
-}
-
-void LssNode::unlock() {
-	mutex.unlock();
-}
-
-void LssWindow::unlock() {
-	pred->unlock();
-	curr->unlock();
-}
-
-LssWindow::LssWindow(LssNode* pred, LssNode* curr) {
-	this->pred = pred;
-	this->curr = curr;
-}
-
-LssNode::LssNode(long item, LssNode* next){
-	this->item = item;
+LssNode::LssNode(long item, LssNode* next):Node(item, next){
 	this->next = next;
-	marked = false;
+	this->marked = false;
 }

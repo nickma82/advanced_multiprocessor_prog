@@ -238,9 +238,8 @@ int main(int argc, char **argv)
 		n = 100;
 	}
 	
-	std::cout << n << " " << t << std::endl;
-
-	/*AMPReferenceSet rs1;
+	
+	AMPReferenceSet rs1;
 	test(&rs1, t, n);
 	
 	FineGrainedLockingSet fgls1;
@@ -252,7 +251,7 @@ int main(int argc, char **argv)
 	
 	LazySynchronizationSet lss1;
 	test(&lss1, t, n);
-	*/
+
 	
 	LockFreeSet lfs1;
 	test(&lfs1, t, n);

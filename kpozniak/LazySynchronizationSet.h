@@ -10,37 +10,26 @@
 #define AMP_LAZY_SYNCHRONIZATION_SET
 
 #include <mutex>
-#include "AMPSet.h"
+#include "OptimisticSynchronizationSet.h"
+#include "FineGrainedLockingSet.h"
 
-class LssNode {
-public:
-	long item;
-	LssNode* next;
-	std::mutex mutex;
-	bool marked;
-	LssNode(long item, LssNode* next);
-	void lock();
-	void unlock();
-};
-
-class LssWindow {
-public:
-	LssNode* pred;
-	LssNode* curr;
-	LssWindow(LssNode* pred, LssNode* curr);
-	void unlock();
-};
-
-class LazySynchronizationSet: public AMPSet
+class LssNode: public Node
 {
-	
+public:
+	LssNode(long item, LssNode* next);
+	LssNode* next;
+	bool marked;
+};
+
+class LazySynchronizationSet: public OptimisticSynchronizationSet
+{
 	
 protected:
 	LssNode* head;
+	Window <LssNode> find(long l);
 	
 private:	
-	LssWindow find(long l);
-	bool validate(LssWindow w);
+	bool validate(Window<LssNode> w);
 
 	
 public:

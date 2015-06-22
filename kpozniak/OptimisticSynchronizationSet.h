@@ -9,19 +9,18 @@
 #ifndef AMP_OPTIMISTIC_SYNCHRONIZATION_SET
 #define AMP_OPTIMISTIC_SYNCHRONIZATION_SET
 
-#include <mutex>
 #include "FineGrainedLockingSet.h"
 
 class OptimisticSynchronizationSet: public FineGrainedLockingSet
 {
 	
 protected:
-	bool validate (Window w);
-	Window find(long l);
+	bool validate (Window<Node> w);
+	virtual Window<Node> find(long l);
 
 	
 public:
-	bool remove(long item);
+	virtual bool remove(long item);
 		
 };
 

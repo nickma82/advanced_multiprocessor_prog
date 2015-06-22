@@ -6,12 +6,11 @@
 *
 */
 
-#include <climits>
 #include <mutex>
 #include "OptimisticSynchronizationSet.h"
 
 bool OptimisticSynchronizationSet::remove(long item) {
-	Window w = find(item);
+	Window<Node> w = find(item);
 	if (item != w.curr->item) {
 		w.unlock();
 		return false;
@@ -22,7 +21,7 @@ bool OptimisticSynchronizationSet::remove(long item) {
 	return true;
 }
 
-Window OptimisticSynchronizationSet::find(long item) {
+Window<Node> OptimisticSynchronizationSet::find(long item) {
 	while (true) {
 		// Search for item or successor
 		Node* pred = head;
@@ -31,7 +30,7 @@ Window OptimisticSynchronizationSet::find(long item) {
 			pred = curr;
 			curr = curr ->next;
 		}
-		Window w(pred , curr);
+		Window<Node> w(pred , curr);
 		pred->lock();
 		curr->lock();
 		if (validate(w)) return w;
@@ -42,7 +41,7 @@ Window OptimisticSynchronizationSet::find(long item) {
 
 
 //checks if a window is valid, this is no item has been deleted or inserted in between
-bool OptimisticSynchronizationSet::validate(Window w) { 
+bool OptimisticSynchronizationSet::validate(Window<Node> w) { 
 	Node* n = head;
 	while (n->item <= w.pred->item) {
 		if (n == w.pred)

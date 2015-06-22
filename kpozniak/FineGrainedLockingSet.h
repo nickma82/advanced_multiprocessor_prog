@@ -22,12 +22,13 @@ public:
 	void unlock();
 };
 
+template <class T>
 class Window {
 public:
-	Node* pred;
-	Node* curr;
-	Window(Node* pred, Node* curr);
-	void unlock();
+	T* pred;
+	T* curr;
+	Window<T>(T* pred, T* curr);
+	virtual void unlock();
 };
 
 class FineGrainedLockingSet: public AMPSet
@@ -36,14 +37,14 @@ class FineGrainedLockingSet: public AMPSet
 	
 protected:
 	Node* head;
-	virtual Window find(long l);
+	virtual Window <Node> find(long l);
 
 	
 public:
 	FineGrainedLockingSet();
 	~FineGrainedLockingSet();
 	
-	bool add(long item);
+	virtual bool add(long item);
 	
 	virtual bool remove(long item);
 	
