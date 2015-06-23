@@ -25,26 +25,32 @@
 
 struct ThreadIOData {
 	/* input data */
-	AMPSet 		&rset;	//the multiThreaded target set
-	size_t		n;		//iterations count
+	AMPSet 			&rset;	//the multiThreaded target set
+	const size_t	n;		//iterations count
 
 	/* output data */
 	std::vector<int> 	resultValues;	//for duplications checks only
 	ValueStore 			valueStore;		//for timer measurements
 
-	/* runtime conditions */
+	/*
+	 * runManipulator has to decide whether another value should be
+	 * added/removed/checked *and* has to manipulat the next value i
+	 * which is going to be processed
+	 * @var[in] i 	reference to the runtime variable which is going to be
+	 * 					added next
+	 * @return 		true if another value should be added, false otherwise
+	 */
 	std::function<bool(int&)> runManipulator;
 
-	ThreadIOData(AMPSet &rset, size_t n) :
+	ThreadIOData(AMPSet &rset, const size_t n) :
 			rset(rset), n(n) {
 
 		//increments i within every call and returns false if (i>=this->n)
 		auto stdRunManipulator = [&n](int &i) {i++; return (i<(int)n); };
 		runManipulator = stdRunManipulator;
 	};
-	ThreadIOData(AMPSet &rset, size_t n, std::function<bool(int&)> runManipulator) :
+	ThreadIOData(AMPSet &rset, const size_t n, std::function<bool(int&)> runManipulator) :
 			rset(rset), n(n), runManipulator(runManipulator) {};
-
 };
 
 
@@ -89,11 +95,6 @@ public:
 		return false;
 	}
 
-	/**
-	 *
-	 * @var[in] runManipulator has to decide with its return value whether another value should be added
-	 * 			 and has to manipulat the value i to be added next
-	 */
 	static void addRemoveUntil(ThreadIOData *ioData, const TimerType operationType) {
 		if (operationType!=ID_INSERT && operationType!=ID_REMOVE)
 			throw new std::invalid_argument("operation type must be either ID_INSERT or ID_REMOVE but was:" + std::to_string(operationType));
@@ -152,7 +153,7 @@ public:
 			if(contains == expected)
 				continue;
 
-			std::cout << "wrong contain!! \n";
+			std::cout << "wrong contain (until)!!" << std::endl;
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -299,6 +300,8 @@ public:
 		}
 		contains_analyser.outputToFile("/tmp/results_contains");
 	}
+
+
 
 	void multithreadRemoveAll() {
 		//remove all elements again
