@@ -24,19 +24,27 @@
 #include "cmdlineOptions.h" //command line parser
 
 struct ThreadIOData {
-	//input data
-	AMPSet 		&rset;
-	size_t		n; //iterations count
+	/* input data */
+	AMPSet 		&rset;	//the multiThreaded target set
+	size_t		n;		//iterations count
 
-	// output data
-	std::vector<int> 	resultValues; //for duplications checks only
-	ValueStore 			valueStore;   //for timer measurements
+	/* output data */
+	std::vector<int> 	resultValues;	//for duplications checks only
+	ValueStore 			valueStore;		//for timer measurements
 
-	//runtime conditions
-	std::chrono::time_point<std::chrono::high_resolution_clock> runUntil;
+	/* runtime conditions */
+	std::function<bool(int&)> runManipulator;
 
 	ThreadIOData(AMPSet &rset, size_t n) :
-		rset(rset), n(n) {};
+			rset(rset), n(n) {
+
+		//increments i within every call and returns false if (i>=this->n)
+		auto stdRunManipulator = [&n](int &i) {i++; return (i<(int)n); };
+		runManipulator = stdRunManipulator;
+	};
+	ThreadIOData(AMPSet &rset, size_t n, std::function<bool(int&)> runManipulator) :
+			rset(rset), n(n), runManipulator(runManipulator) {};
+
 };
 
 
@@ -81,14 +89,19 @@ public:
 		return false;
 	}
 
-	static void addRemoveUntil(ThreadIOData *ioData, const TimerType operationType, std::function<bool(int&)> runCondition) {
+	/**
+	 *
+	 * @var[in] runManipulator has to decide with its return value whether another value should be added
+	 * 			 and has to manipulat the value i to be added next
+	 */
+	static void addRemoveUntil(ThreadIOData *ioData, const TimerType operationType) {
 		if (operationType!=ID_INSERT && operationType!=ID_REMOVE)
 			throw new std::invalid_argument("operation type must be either ID_INSERT or ID_REMOVE but was:" + std::to_string(operationType));
 
 		auto timer = StartStopTimer(operationType);
 
 		int i = 0, rc = 0;
-		while( runCondition(i) ) {
+		while( ioData->runManipulator(i) ) {
 			timer.time_start();
 			// differ between insert and remove
 			if(operationType == ID_INSERT) {
@@ -126,9 +139,23 @@ public:
 
 	}
 
-//	static void containsUntil(ThreadIOData *ioData, const bool expected, std::function<bool(int&)> &runCondition) {
-//
-//	}
+	static void containsUntil(ThreadIOData *ioData, const bool expected) {
+		auto timer = StartStopTimer(ID_CONTAINS);
+		int i = 0;
+
+		while( ioData->runManipulator(i) ) {
+			timer.time_start();
+			auto contains = ioData->rset.contains(i);
+			timer.time_stop();
+			ioData->valueStore.addTimeMeasurement(timer);
+
+			if(contains == expected)
+				continue;
+
+			std::cout << "wrong contain!! \n";
+			exit(EXIT_FAILURE);
+		}
+	}
 
 	static void test(std::function<bool(int&)> f) {
 		int i = 0;
@@ -223,21 +250,21 @@ public:
 	 * @note threads are *not* startet all at the same time
 	 */
 	void multithreadedAddOneSecond() {
-		//calculate the one second timespan
-		std::chrono::system_clock::time_point stopTime = std::chrono::system_clock::now() + std::chrono::seconds(1);
-
 		//create the runCondition
-		auto runCondition = [stopTime](int &) {
+		const uint8_t runTimeSeconds = 1;
+		auto stopTime =
+				std::chrono::system_clock::now() + std::chrono::seconds(runTimeSeconds);
+		std::function<bool(int&)> runCondition = [stopTime](int &i) {
+			i++;
 			return (std::chrono::system_clock::now() < stopTime);
 		};
-		int j;
-		std::cout << "runCondition is now in state:" << runCondition(j) << std::endl;
+
 
 		/* same as in multithreadAddonly */
-		std::vector<ThreadIOData> insertIOData(threadCount, ThreadIOData(set, iterations));
+		std::vector<ThreadIOData> insertIOData(threadCount, ThreadIOData(set, iterations, runCondition));
 		std::vector<std::thread> threadVector1(threadCount);
 		for(size_t i=0; i<threadCount; ++i) {
-			threadVector1[i] = std::thread( SetTestActions::addRemoveUntil, &insertIOData[i], ID_INSERT, runCondition );
+			threadVector1[i] = std::thread( SetTestActions::addRemoveUntil, &insertIOData[i], ID_INSERT );
 		}
 
 		ValueAnalyser insert_analyser;
