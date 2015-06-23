@@ -28,7 +28,7 @@ ReturnProxy CommandLineOptions::getValue(const std::string& key)  {
 void CommandLineOptions::printUsage() {
 	std::cout << "Usage: " << std::endl;
 	std::cout << "valid arguments are (please give at least one):" << std::endl;
-	std::cout << "\t --add --remove --random" << std::endl;
+	std::cout << "\t --add --remove --random --benchmarkTimeout" << std::endl;
 
 	std::cout << "\t --implementation={FGL, OS, LS, LF, REF}" << std::endl;
 	std::cout << "\t --threadCount=[1,512]" << std::endl;

@@ -66,11 +66,13 @@ public:
 	void printUsage();
 private:
 	//see c++11 uniform initialization, note size must be given
-	const struct option long_options_common[7] {
+	const struct option long_options_common[8] {
 		//{"foo", 		no_argument, &tmpInteger, 1}, //flag
 		{"add", 	no_argument, nullptr, 0},
 		{"remove", 	no_argument, nullptr, 0},
 		{"random", 	no_argument, nullptr, 0},
+
+		{"benchmarkTimeout",no_argument,nullptr,0},
 
 		//{"implementation",	required_argument, &tmpValue, TESTVALUE},
 		{"implementation",	required_argument, nullptr, 0},
