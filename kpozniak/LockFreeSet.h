@@ -9,8 +9,6 @@
 #ifndef AMP_LOCK_FREE_SET
 #define AMP_LOCK_FREE_SET
 
-#include <atomic>
-#include <mutex>
 #include "AMPSet.h"
 
 
