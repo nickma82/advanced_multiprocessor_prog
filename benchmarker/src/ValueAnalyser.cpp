@@ -10,7 +10,7 @@ void ValueAnalyser::addValueStore(const ValueStore &store) {
 }
 
 void ValueAnalyser::addValueStore(const ValueStore &store, const unsigned int threadID) {
-		std::cout << "add(" << (uint16_t)store.getStoredValueCount()
+		std::cout << "add(" << store.getMeasuredValueCount()
 				<< " from thr:" << threadID << ") ";
 
 		for(auto each: store.measuredValues) {

@@ -11,6 +11,6 @@ void ValueStore::addMeasurementWithoutTimer(const TimerType type) {
 	measuredValues.push_back(TimerValue(INVALID_TIMESPAN, type));
 }
 
-size_t ValueStore::getStoredValueCount() const {
+size_t ValueStore::getMeasuredValueCount() const {
 	return measuredValues.size();
 }

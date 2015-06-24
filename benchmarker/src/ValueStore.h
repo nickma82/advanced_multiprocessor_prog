@@ -34,7 +34,7 @@ public:
 	 */
 	void addMeasurementWithoutTimer(const TimerType type);
 
-	size_t getStoredValueCount() const;
+	size_t getMeasuredValueCount() const;
 };
 
 
