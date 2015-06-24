@@ -35,18 +35,18 @@ struct ThreadIOData {
 	/*
 	 * runManipulator has to decide whether another value should be
 	 * added/removed/checked *and* has to manipulat the next value i
-	 * which is going to be processed
+	 * which is going to be processed.
 	 * @var[in] i 	reference to the runtime variable which is going to be
 	 * 					added next
 	 * @return 		true if another value should be added, false otherwise
 	 */
 	std::function<bool(int&)> runManipulator;
 
-	ThreadIOData(AMPSet &rset, const size_t n) :
-			rset(rset), n(n) {
+	ThreadIOData(AMPSet &rset, const size_t iterations) :
+			rset(rset), n(iterations) {
 
 		//increments i within every call and returns false if (i>=this->n)
-		auto stdRunManipulator = [&n](int &i) {i++; return (i<(int)n); };
+		auto stdRunManipulator = [iterations](int &i) {i++; return (i<(int)iterations); };
 		runManipulator = stdRunManipulator;
 	};
 	ThreadIOData(AMPSet &rset, const size_t n, std::function<bool(int&)> runManipulator) :
@@ -101,8 +101,9 @@ public:
 
 		auto timer = StartStopTimer(operationType);
 
-		int i = 0, rc = 0;
+		int i = -1;
 		while( ioData->runManipulator(i) ) {
+			int rc = 0;
 			timer.time_start();
 			// differ between insert and remove
 			if(operationType == ID_INSERT) {
@@ -120,30 +121,10 @@ public:
 		}
 	}
 
-	static void contains(ThreadIOData *ioData, const bool expected) {
-		auto timer = StartStopTimer(ID_CONTAINS);
-
-		//@note no need to fill ioData->resultValues because we arent going to
-		// check for duplicated contains-checks
-		for(size_t i=0; i < ioData->n; ++i) {
-			timer.time_start();
-			auto contains = ioData->rset.contains(i);
-			timer.time_stop();
-			ioData->valueStore.addTimeMeasurement(timer);
-
-			if(contains == expected)
-				continue;
-
-			std::cout << "wrong contain!! \n";
-			exit(EXIT_FAILURE);
-		}
-
-	}
-
 	static void containsUntil(ThreadIOData *ioData, const bool expected) {
 		auto timer = StartStopTimer(ID_CONTAINS);
-		int i = 0;
 
+		int i = -1;
 		while( ioData->runManipulator(i) ) {
 			timer.time_start();
 			auto contains = ioData->rset.contains(i);
@@ -156,12 +137,6 @@ public:
 			std::cout << "wrong contain (until)!!" << std::endl;
 			exit(EXIT_FAILURE);
 		}
-	}
-
-	static void test(std::function<bool(int&)> f) {
-		int i = 0;
-
-		std::cout << "i:" << i << ", f(i):" << f(i) << std::endl;
 	}
 };
 
@@ -204,7 +179,9 @@ public:
 	 * The constructor takes variables needed by every method in this class
 	 */
 	SetBenchmarkOperations(AMPSet &targetSet, const size_t threadCount, const int iterations) :
-		set(targetSet), threadCount(threadCount), iterations(iterations) {}
+		set(targetSet), threadCount(threadCount), iterations(iterations) {
+		std::cout << "Initializing SetBenchmarkOperations with " << threadCount << " threads, with " << iterations << "iterations" << std::endl;
+	}
 
 	void basicFunctionality() {
 		//run some basic functionality tests on one thread
@@ -227,6 +204,7 @@ public:
 
 
 	void multithreadAddOnly() {
+		std::cout << "going to fire up " << threadCount << " threads, with " << iterations << "iterations" << std::endl;
 		//run add only test on multiple threads
 		std::vector<ThreadIOData> insertIOData(threadCount, ThreadIOData(set, iterations));
 		std::vector<std::thread> threadVector1(threadCount);
@@ -288,7 +266,7 @@ public:
 		std::vector<ThreadIOData> containsIOData(threadCount, ThreadIOData(set, iterations));
 		std::vector<std::thread> threadVector2(threadCount);
 		for(size_t i=0; i<threadCount; ++i) {
-			threadVector2.at(i) = std::thread ( SetTestActions::contains, &containsIOData[i], expected);
+			threadVector2.at(i) = std::thread ( SetTestActions::containsUntil, &containsIOData[i], expected);
 		}
 
 		ValueAnalyser contains_analyser;
@@ -349,8 +327,8 @@ int main (int argc, char **argv) {
 		return EXIT_FAILURE;
 
 	// get user values. if not set, set to default
-	const int threadCount =  cmdOption.getValue("threadCount")  ? cmdOption.getValue("threadCount")  : 50;
-	const int repeatCycles = cmdOption.getValue("repeatCycles") ? cmdOption.getValue("repeatCycles") : 1000;
+	const int threadCount =  (int)cmdOption.getValue("threadCount")  ? cmdOption.getValue("threadCount")  : 50;
+	const int repeatCycles = (int)cmdOption.getValue("repeatCycles") ? cmdOption.getValue("repeatCycles") : 1000;
 	//options are: FGL, OS, LS, LBS, REF
 	const std::string implementation = cmdOption.getValue("implementation");
 
@@ -366,10 +344,6 @@ int main (int argc, char **argv) {
 		targetSet.reset(new LazySynchronizationSet);
 	} else if(implementation == "LF") {
 		targetSet.reset(new LockFreeSet);
-	} else if(implementation == "test") {
-		auto runCond = [&rc](int &i) { std::cout << i++ << std::endl; rc=3; return false;};
-		SetTestActions::test( runCond);
-		std::cout << "rc:" << rc << std::endl;
 	} else {
 		std::cout << "implementation parameter '" << implementation << "' not recognized" << std::endl;
 		std::cout << "please add at least --implementation=<option>" << std::endl;
@@ -386,6 +360,7 @@ int main (int argc, char **argv) {
 		benchmarkRunUntilTime(*targetSet, threadCount, repeatCycles);
 	} else {
 		std::cout << "starting implementation:" << implementation << std::endl;
+		std::cout << "calling benchmarkBareRun " << threadCount << " threads, with " << repeatCycles << "iterations" << std::endl;
 		benchmarkBareRun(*targetSet, threadCount, repeatCycles);
 	}
 
