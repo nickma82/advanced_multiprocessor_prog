@@ -16,7 +16,7 @@ void ThreadTimerValue::printValues() {
 std::ostream& operator<<(std::ostream& os, const ThreadTimerValue& obj) {
 	// write obj to stream
 	os << std::setw(10) << std::setfill(' ') << (unsigned int)obj.threadID
-			<< std::setw(10) << std::setfill(' ') << obj.duration.count()
-			<< std::setw(10) << std::setfill(' ') << obj.timerType;
+			<< "," << std::setw(9) << std::setfill(' ') << obj.duration.count()
+			<< "," << std::setw(9) << std::setfill(' ') << obj.timerType;
 	return os;
 }

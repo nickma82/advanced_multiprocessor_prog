@@ -30,11 +30,11 @@ void ValueAnalyser::outputToFile(const std::string &pathToFile) {
 
 	// print first line
 	myfile << std::setw(10) << std::setfill(' ') << "Thread"
-			<< std::setw(10) << std::setfill(' ') << "Duration"
-			<< std::setw(10) << std::setfill(' ') << "TimerType"
+			<< "," << std::setw(9) << std::setfill(' ') << "Duration"
+			<< "," << std::setw(9) << std::setfill(' ') << "TimerType"
 			<< std::endl;
 
-	// print out all other lines
+	// print out all TimeValues
 	for(auto each: _threadedTimerValues) {
 		myfile << each << std::endl;
 	}
