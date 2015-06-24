@@ -230,7 +230,7 @@ public:
 	 */
 	void multithreadedAddOneSecond() {
 		//create the runCondition
-		const uint8_t runTimeSeconds = 1;
+		const uint8_t runTimeSeconds = 5;
 		auto stopTime =
 				std::chrono::system_clock::now() + std::chrono::seconds(runTimeSeconds);
 		std::function<bool(int&)> runCondition = [stopTime](int &i) {
