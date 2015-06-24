@@ -13,7 +13,7 @@ OBJS =		src/main.o \
 		kpozniak/LazySynchronizationSet.o \
 		kpozniak/LockFreeSet.o
 		
-LIBS = -pthread
+LIBS = -pthread -m64
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
@@ -36,4 +36,4 @@ $(TARGET):	$(OBJS)
 all:	$(TARGET)
 
 clean:
-	rm -f $(OBJS) $(TARGET)	
+	rm -f $(OBJS) $(TARGET)

@@ -61,7 +61,7 @@ public:
 	 */
 	static void addRemove(ThreadIOData *ioData, const TimerType operationType) {
 		if (operationType!=ID_INSERT && operationType!=ID_REMOVE)
-			throw new std::invalid_argument("operation type must be either ID_INSERT or ID_REMOVE but was:" + std::to_string(operationType));
+			throw new std::invalid_argument("operation type must be either ID_INSERT or ID_REMOVE but was:");
 
 		const size_t pseudoRandomValue = 10;
 		/*
@@ -97,7 +97,7 @@ public:
 
 	static void addRemoveUntil(ThreadIOData *ioData, const TimerType operationType) {
 		if (operationType!=ID_INSERT && operationType!=ID_REMOVE)
-			throw new std::invalid_argument("operation type must be either ID_INSERT or ID_REMOVE but was:" + std::to_string(operationType));
+			throw new std::invalid_argument("operation type must be either ID_INSERT or ID_REMOVE but was:");
 
 		auto timer = StartStopTimer(operationType);
 
@@ -230,7 +230,7 @@ public:
 	 */
 	void multithreadedAddOneSecond() {
 		//create the runCondition
-		const uint8_t runTimeSeconds = 1;
+		const uint8_t runTimeSeconds = 5;
 		auto stopTime =
 				std::chrono::system_clock::now() + std::chrono::seconds(runTimeSeconds);
 		std::function<bool(int&)> runCondition = [stopTime](int &i) {
