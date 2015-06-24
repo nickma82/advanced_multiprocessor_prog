@@ -316,6 +316,12 @@ void benchmarkBareRun(AMPSet &set, const size_t threadCount, const int iteration
 }
 
 void benchmarkRunUntilTime(AMPSet &set, const size_t threadCount, const int iterations) {
+	//add testData: single threaded - without benchmark
+	//contains benchmark : multithreaded
+	//remove benchmark: remove multtith
+	//removeAll : remove single threaded - without benchmark
+
+	//add multithreaded - with benchmark
 	SetBenchmarkOperations setBenchmarkOperations(set, threadCount, iterations);
 	setBenchmarkOperations.multithreadedAddOneSecond();
 }
