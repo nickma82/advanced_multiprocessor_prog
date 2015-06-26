@@ -39,6 +39,8 @@ public:
 	 */
 	DURATION_BASE getTimeSpan() const;
 
+	void outputToFile(const std::string &pathToFile);
+
 private:
 
 	bool _measurementRunning = false;

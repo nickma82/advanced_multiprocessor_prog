@@ -1,5 +1,8 @@
 #include "TimeMeasurement.h"
 
+#include <fstream>
+#include <ostream>
+#include <iostream>
 #include <stdexcept>
 
 void StartStopTimer::time_start() {
@@ -32,4 +35,20 @@ void StartStopTimer::setMeasurementRunning(const bool &nextState) {
 				std::string(nextState?"1":"0") );
 
 	_measurementRunning = nextState;
+}
+
+void StartStopTimer::outputToFile(const std::string &pathToFile) {
+	std::cout << "\n" << "going to open file '" << pathToFile
+				<< "' to write the timer value to it" << std::endl;
+
+	std::ofstream myfile;
+	myfile.open(pathToFile);
+
+	// print first line
+	myfile << "Duration" << std::endl;
+	myfile << timespan.count() << std::endl;
+
+	// saving to the file
+	myfile.close();
+
 }
