@@ -183,26 +183,6 @@ public:
 		std::cout << "Initializing SetBenchmarkOperations with " << threadCount << " threads, with " << iterations << "iterations" << std::endl;
 	}
 
-	void basicFunctionality() {
-		//run some basic functionality tests on one thread
-		if(set.add(5)!=true) exit(EXIT_FAILURE);
-		if(set.add(5)!=false) exit(EXIT_FAILURE);
-		if(set.add(6)!=true) exit(EXIT_FAILURE);
-		if(set.add(7)!=true) exit(EXIT_FAILURE);
-		if(set.add(8)!=true) exit(EXIT_FAILURE);
-		if(set.add(1)!=true) exit(EXIT_FAILURE);
-		if(set.add(8)!=false) exit(EXIT_FAILURE);
-		if(set.add(1)!=false) exit(EXIT_FAILURE);
-
-		if(set.contains(1)!=true) exit(EXIT_FAILURE);
-
-		if(set.remove(1)!=true) exit(EXIT_FAILURE);
-		if(set.remove(1)!=false) exit(EXIT_FAILURE);
-
-		if(set.contains(1)!=false) exit(EXIT_FAILURE);
-	}
-
-
 	void multithreadAddOnly() {
 		std::cout << "going to fire up " << threadCount << " threads, with " << iterations << "iterations" << std::endl;
 		//run add only test on multiple threads
@@ -304,7 +284,6 @@ public:
 
 void benchmarkBareRun(AMPSet &set, const size_t threadCount, const int iterations) {
 	SetBenchmarkOperations setBenchmarkOperations(set, threadCount, iterations);
-	setBenchmarkOperations.basicFunctionality();
 
 	setBenchmarkOperations.multithreadAddOnly();
 	setBenchmarkOperations.multithreadContains(true);
