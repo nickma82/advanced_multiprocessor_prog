@@ -8,7 +8,6 @@ mars.lf.time   <- read.table("~/Downloads/ampp_measurements/inserting_5sec_mars_
 mars.ls.time   <- read.table("~/Downloads/ampp_measurements/inserting_5sec_mars_80_threads_LS.csv",   sep=",", head=TRUE)
 mars.os.time   <- read.table("~/Downloads/ampp_measurements/inserting_5sec_mars_80_threads_OS.csv",   sep=",", head=TRUE)
 mars.ref.time  <- read.table("~/Downloads/ampp_measurements/inserting_5sec_mars_80_threads_REF.csv",  sep=",", head=TRUE)
-names(my.data)
 
 
 # per set, per operation, per machine
@@ -27,8 +26,8 @@ ceres.fgl.time.fairness = table(ceres.fgl.time$Thread)
 ceres.ls.time.fairness  = table(ceres.ls.time$Thread )
 ceres.os.time.fairness  = table(ceres.os.time$Thread )
 ceres.ref.time.fairness = table(ceres.ref.time$Thread)
-mars.fgl.time.fairness  = table(mars.fgl.time$Thread )
 mars.lf.time.fairness   = table(mars.lf.time$Thread  )
+mars.fgl.time.fairness  = table(mars.fgl.time$Thread )
 mars.ls.time.fairness   = table(mars.ls.time$Thread  )
 mars.os.time.fairness   = table(mars.os.time$Thread  )
 mars.ref.time.fairness  = table(mars.ref.time$Thread )
@@ -55,30 +54,42 @@ dev.off()
 ## @ref http://stackoverflow.com/questions/13490299/add-column-to-empty-data-table-in-r
 tmp.newTable = table(1:1)
 tmp.newTable["foo"] = 42
-sd = tmp.newTable[0]    #create an empty table with [named numeric(0)]
+sdTable = tmp.newTable[0]    #create an empty table with [named numeric(0)]
 
 ## we have an empty table now and are going to fill it up
-sd["ceres.lf" ] = sd(ceres.lf.time.fairness )
-sd["ceres.fgl"] = sd(ceres.fgl.time.fairness)
-sd["ceres.ls" ] = sd(ceres.ls.time.fairness )
-sd["ceres.os" ] = sd(ceres.os.time.fairness )
-sd["ceres.ref"] = sd(ceres.ref.time.fairness)
-sd["mars.fgl" ] = sd(mars.fgl.time.fairness )
-sd["mars.lf"  ] = sd(mars.lf.time.fairness  )
-sd["mars.ls"  ] = sd(mars.ls.time.fairness  )
-sd["mars.os"  ] = sd(mars.os.time.fairness  )
-sd["mars.ref" ] = sd(mars.ref.time.fairness )
+sdTable["ceres.lf" ] = sd(ceres.lf.time.fairness )
+sdTable["ceres.fgl"] = sd(ceres.fgl.time.fairness)
+sdTable["ceres.ls" ] = sd(ceres.ls.time.fairness )
+sdTable["ceres.os" ] = sd(ceres.os.time.fairness )
+sdTable["ceres.ref"] = sd(ceres.ref.time.fairness)
+sdTable["mars.lf"  ] = sd(mars.lf.time.fairness  )
+sdTable["mars.fgl" ] = sd(mars.fgl.time.fairness )
+sdTable["mars.ls"  ] = sd(mars.ls.time.fairness  )
+sdTable["mars.os"  ] = sd(mars.os.time.fairness  )
+sdTable["mars.ref" ] = sd(mars.ref.time.fairness )
 
-barplot(sd)
+postscript("insert_allSets_allMachines_SD_plot.eps", horizontal=FALSE)
+barplot(sdTable, las=2, ylab="standard deviation (sigma)")
+dev.off()
 
 # average out Duration according to the Thread number
 ## latenz : avrg Duration
 ## @ref http://stat.ethz.ch/R-manual/R-devel/library/stats/html/aggregate.html
 ## @ref http://stackoverflow.com/questions/15047742/sum-of-rows-based-on-column-value
+## @ref http://r.789695.n4.nabble.com/R-barplot-different-colors-for-the-bar-and-the-strips-td807339.html
+## @ref http://www.r-bloggers.com/setting-graph-margins-in-r-using-the-par-function-and-lots-of-cow-milk/
 my.data.latency = aggregate(cbind(Duration) ~ Thread, data=my.data, FUN=mean)
 boxplot(my.data.latency$Duration, xlab="avrg duration per thread [ns]", horizontal=TRUE)
 
 # durchsatz : 
-
-
+throughputTable = tmp.newTable[0]
+throughputTable["ceres.lf" ] = dim(ceres.lf.time  )[1]
+throughputTable["mars.lf"  ] = dim(mars.lf.time   )[1]
+throughputTable["ceres.fgl"] = dim(ceres.fgl.time )[1]
+throughputTable["mars.fgl" ] = dim(mars.fgl.time  )[1]throughputTable["ceres.ls" ] = dim(ceres.ls.time  )[1]throughputTable["mars.ls"  ] = dim(mars.ls.time   )[1]throughputTable["ceres.os" ] = dim(ceres.os.time  )[1]throughputTable["mars.os"  ] = dim(mars.os.time   )[1]throughputTable["ceres.ref"] = dim(ceres.ref.time )[1]throughputTable["mars.ref" ] = dim(mars.ref.time  )[1]
+postscript("insert_throughput_allSets_allMachines.eps", horizontal=FALSE)
+## bottom, left, top and right margins
+par(mar=c(7,6,1,2)+0.1,mgp=c(5,1,0)) ##format the labels
+barplot(throughputTable, las=2, xlab="benchmarked sets", ylab="(number of operation)/5sec", col=c(9,9,9,9,9,8,8,8,8,8))
+dev.off()
 
