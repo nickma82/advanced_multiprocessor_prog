@@ -139,21 +139,30 @@ static void containsUntil(ThreadIOData *ioData, const bool expected) {
 	}
 }
 
-static void addThroughput(AMPSet* set, const size_t n) {	
-	for(size_t i=0; i<n; ++i) { 
-		set->add(n);
+static void addThroughput(AMPSet* set, const size_t n, const int tId, const int t) {
+	for(size_t i=tId; i<n*t; i=i+t) { 
+		set->add(i);
 	}
 }
 
-static void containsThroughput(AMPSet* set, const size_t n) {	
-	for(size_t i=0; i<n; ++i) { 
-		set->contains(n);
+static void containsThroughput(AMPSet* set, const size_t n, const int tId, const int t) {	
+	for(size_t i=tId; i<n*t; i=i+t) { 
+		set->contains(i);
 	}
 }
 
-static void removeThroughput(AMPSet* set, const size_t n) {	
-	for(size_t i=0; i<n; ++i) { 
-		set->remove(n);
+static void removeThroughput(AMPSet* set, const size_t n, const int tId, const int t) {	
+	for(long i=n*t-1-tId; i>=0; i=i-t) { 
+		set->remove(i);
+	}
+}
+
+static void combinedThroughput(AMPSet* set, const size_t n, const int tId, const int t) {	
+	for(size_t i=0; i<n/4; i++) { 
+		set->add(i);
+		set->contains(i);
+		set->remove(i);
+		set->contains(i);
 	}
 }
 
@@ -386,23 +395,23 @@ void fillSet(AMPSet* set, size_t elements) {
 	
 }
 
-void benchmarkThroughput(std::string implementation, const size_t threadCount, const size_t iterations) {
+void benchmarkThroughput(std::string implementation, const int threadCount, const size_t iterations) {
 	
 	//Add
 	AMPSet* set = getSetById(implementation);
 	
 	std::vector<std::thread> threadVector(threadCount);
 	
-	//fillSet(set, iterations);
+	fillSet(set, iterations*threadCount);
 	
 	StartStopTimer overallTimer1 = StartStopTimer(ID_INSERT);
 	overallTimer1.time_start();
 	
-	for(size_t i=0; i<threadCount; i++) {
-		threadVector[i] = std::thread( SetTestActions::addThroughput, set, iterations );
+	for(int i=0; i<threadCount; i++) {
+		threadVector[i] = std::thread( SetTestActions::addThroughput, set, iterations, i, threadCount);
 	}
 	
-	for(size_t i=0; i<threadCount; i++) {
+	for(int i=0; i<threadCount; i++) {
 		threadVector.at(i).join();
 	}
 	
@@ -415,17 +424,17 @@ void benchmarkThroughput(std::string implementation, const size_t threadCount, c
 	//contains
 	set = getSetById(implementation);
 	
-	fillSet(set, iterations);
+	fillSet(set, iterations*threadCount);
 	
 	
 	StartStopTimer overallTimer2 = StartStopTimer(ID_INSERT);
 	overallTimer2.time_start();
 	
-	for(size_t i=0; i<threadCount; i++) {
-		threadVector[i] = std::thread( SetTestActions::containsThroughput, set, iterations );
+	for(int i=0; i<threadCount; i++) {
+		threadVector[i] = std::thread( SetTestActions::containsThroughput, set, iterations, i, threadCount);
 	}
 	
-	for(size_t i=0; i<threadCount; i++) {
+	for(int i=0; i<threadCount; i++) {
 		threadVector.at(i).join();
 	}
 	overallTimer2.time_stop();
@@ -437,20 +446,40 @@ void benchmarkThroughput(std::string implementation, const size_t threadCount, c
 	//remove
 	set = getSetById(implementation);
 	
-	fillSet(set, iterations);
+	fillSet(set, iterations*threadCount);
 	
 	StartStopTimer overallTimer3 = StartStopTimer(ID_INSERT);
 	overallTimer3.time_start();
 	
-	for(size_t i=0; i<threadCount; i++) {
-		threadVector[i] = std::thread( SetTestActions::removeThroughput, set, iterations );
+	for(int i=0; i<threadCount; i++) {
+		threadVector[i] = std::thread( SetTestActions::removeThroughput, set, iterations, i, threadCount);
 	}
 	
-	for(size_t i=0; i<threadCount; i++) {
+	for(int i=0; i<threadCount; i++) {
 		threadVector.at(i).join();
 	}
 	overallTimer3.time_stop();
-	std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(overallTimer3.getTimeSpan()).count();
+	std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(overallTimer3.getTimeSpan()).count() << ", ";
+	
+	delete set;
+		
+	//combined
+	set = getSetById(implementation);
+	
+	fillSet(set, iterations*threadCount);
+	
+	StartStopTimer overallTimer4 = StartStopTimer(ID_INSERT);
+	overallTimer4.time_start();
+	
+	for(int i=0; i<threadCount; i++) {
+		threadVector[i] = std::thread( SetTestActions::combinedThroughput, set, iterations, i, threadCount);
+	}
+	
+	for(int i=0; i<threadCount; i++) {
+		threadVector.at(i).join();
+	}
+	overallTimer4.time_stop();
+	std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(overallTimer4.getTimeSpan()).count();
 	
 	delete set;
 	
