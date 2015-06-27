@@ -23,11 +23,15 @@ private:
 	std::set<long> set;
 
 public:
-	virtual bool add(long item);
 	
-	virtual bool remove(long item);
+	AMPReferenceSet();
+	~AMPReferenceSet();
+	
+	bool add(long item);
+	
+	bool remove(long item);
 
-	virtual bool contains(long item);
+	bool contains(long item);
 
 };
 
