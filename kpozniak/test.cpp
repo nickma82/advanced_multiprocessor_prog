@@ -11,6 +11,7 @@
 #include <thread>
 #include <vector>
 #include <set>
+#include <stdlib.h>
 
 #include "OptimisticSynchronizationSet.h"
 #include "FineGrainedLockingSet.h"
