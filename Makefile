@@ -1,8 +1,11 @@
 CXXFLAGS= -O3 -Wall -std=c++11 -m64
 CPPFLAGS= $(INC_PARAMS)
 
-OBJS =		src/main.o \
-		benchmarker/src/TimeMeasurement.o \
+BENCHMARKOBJS =		src/main.o
+
+TESTOBJS = 	kpozniak/test.o
+
+OBJS =  benchmarker/src/TimeMeasurement.o \
 		benchmarker/src/TimeValues.o \
 		benchmarker/src/ValueAnalyser.o \
 		benchmarker/src/ValueStore.o \
@@ -11,7 +14,7 @@ OBJS =		src/main.o \
 		kpozniak/FineGrainedLockingSet.o \
 		kpozniak/OptimisticSynchronizationSet.o \
 		kpozniak/LazySynchronizationSet.o \
-		kpozniak/LockFreeSet.o
+		kpozniak/LockFreeSet.o 
 		
 LIBS = -pthread -m64
 
@@ -29,11 +32,15 @@ INC_PARAMS=$(foreach d, $(INCLUDE_DIR), -I$d)
 
 
 TARGET =	ampp_root
+TESTTARGET = ampp_test
 
-$(TARGET):	$(OBJS)
-	$(CXX) -o $(TARGET) $(OBJS) $(LIBS)
+all:	benchmark test
 
-all:	$(TARGET)
+benchmark: $(OBJS) $(BENCHMARKOBJS)
+	$(CXX) -o $(TARGET) $(BENCHMARKOBJS) $(OBJS) $(LIBS)
+
+test:  $(OBJS) $(TESTOBJS)
+	$(CXX) -o $(TESTTARGET) $(TESTOBJS) $(OBJS) $(LIBS)	
 
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(OBJS) $(TARGET) $(TESTTARGET) $(BENCHMARKOBJS) $(TESTOBJS)
