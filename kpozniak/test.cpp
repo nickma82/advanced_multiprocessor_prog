@@ -7,12 +7,10 @@
 *
 */
 
-
 #include <iostream>
 #include <thread>
 #include <vector>
 #include <set>
-#include <stdlib.h>
 
 #include "OptimisticSynchronizationSet.h"
 #include "FineGrainedLockingSet.h"
@@ -22,16 +20,14 @@
 #include "AMPSet.h"
 #include "cmdlineOptions.h"
 
-
-
-void addTest(AMPSet *rs, int n, std::vector<long> *vec)
+void addTest(AMPSet *set, int n, std::vector<long> *vec)
 {	
 	long i=0;
 	
 	while(i<n) {
 		long j=0;
 		while(j<10) {
-			if(rs->add(i)) vec->push_back(i);
+			if(set->add(i)) vec->push_back(i);
 			j++;
 		}
 		i++;
@@ -39,13 +35,13 @@ void addTest(AMPSet *rs, int n, std::vector<long> *vec)
 	
 }
 
-void containsTest(AMPSet *rs, int n, bool expected)
+void containsTest(AMPSet *set, int n, bool expected)
 {
 	long i=0;
 	
 	while(i<n) {
 		
-		if(rs->contains(i) != expected) {
+		if(set->contains(i) != expected) {
 			std::cout << "wrong contain!! \n";
 			exit(EXIT_FAILURE);
 		}
@@ -55,14 +51,14 @@ void containsTest(AMPSet *rs, int n, bool expected)
 	
 }
 
-void removeTest(AMPSet *rs, int n, std::vector<long> *vec)
+void removeTest(AMPSet *set, int n, std::vector<long> *vec)
 {
 	long i=0;
 	
 	while(i<n) {
 		long j=0;
 		while(j<10) {
-			if(rs->remove(i)) vec->push_back(i);
+			if(set->remove(i)) vec->push_back(i);
 			j++;
 		}
 		i++;
@@ -70,35 +66,28 @@ void removeTest(AMPSet *rs, int n, std::vector<long> *vec)
 	
 }
 
-void mixedAdd(AMPSet *rs, long id, int n, std::vector<long> *vec) {
+void mixedTest(AMPSet *set, long id, int n) {
 	
 	int i = 0;
 	
 	while(i<n) {
 		
-		long j=0;
-		while(j<10) {
-			if(rs->add(j)) vec->push_back(j);
-			j++;
+		if(set->add(id) != true) {
+			std::cout << "wrong add!! \n";
+			exit(EXIT_FAILURE);
 		}
-		
-		i++;
-	}
-	
-}
-
-void mixedRemove(AMPSet *rs, long id, int n, std::vector<long> *vec) {
-	
-	int i = 0;
-	
-	while(i<n) {
-		
-		long j=0;
-		while(j<10) {
-			if(rs->remove(j)) vec->push_back(j);
-			j++;
+		if(set->contains(id) != true) {
+			std::cout << "wrong contains!! \n";
+			exit(EXIT_FAILURE);
 		}
-		
+		if(set->remove(id) != true) {
+			std::cout << "wrong remove!! \n";
+			exit(EXIT_FAILURE);
+		}
+		if(set->contains(id) != false) {
+			std::cout << "wrong contains!! \n";
+			exit(EXIT_FAILURE);
+		}
 		i++;
 	}
 	
@@ -127,15 +116,15 @@ void test(AMPSet *set, int threads, int iterations) {
 	
 	//run add only test on multiple threads
 	
-	std::vector<std::thread> threadVector1(threads);
+	std::vector<std::thread> threadVector(threads);
 	std::vector<std::vector<long>> checkVectors1(threads, std::vector<long>());
 	
 	for(int i=0; i<threads; i++) {
-		threadVector1.at(i) = std::thread (addTest, set, iterations, &checkVectors1.at(i));
+		threadVector.at(i) = std::thread (addTest, set, iterations, &checkVectors1.at(i));
 	}
 	
 	for(int i=0; i<threads; i++) {
-		threadVector1.at(i).join();
+		threadVector.at(i).join();
 	}
 	
 	//check if every element was only added once
@@ -158,28 +147,25 @@ void test(AMPSet *set, int threads, int iterations) {
 	
 	//check if the right elements are contained in the set
 	
-	std::vector<std::thread> threadVector2(threads);
-	
 	for(int i=0; i<threads; i++) {
-		threadVector2.at(i) = std::thread (containsTest, set, iterations, true);
+		threadVector.at(i) = std::thread (containsTest, set, iterations, true);
 	}
 	
 	for(int i=0; i<threads; i++) {
-		threadVector2.at(i).join();
+		threadVector.at(i).join();
 	}
 	
 	
 	//remove all elements again
 	
-	std::vector<std::thread> threadVector3(threads);
 	std::vector<std::vector<long>> checkVectors3(threads, std::vector<long>());
 	
 	for(int i=0; i<threads; i++) {
-		threadVector3.at(i) = std::thread (removeTest, set, iterations, &checkVectors3.at(i));
+		threadVector.at(i) = std::thread (removeTest, set, iterations, &checkVectors3.at(i));
 	}
 	
 	for(int i=0; i<threads; i++) {
-		threadVector3.at(i).join();
+		threadVector.at(i).join();
 	}
 	
 	//check if every element was only removed once
@@ -201,14 +187,20 @@ void test(AMPSet *set, int threads, int iterations) {
 	
 	//check if the set is now empty
 	
-	std::vector<std::thread> threadVector4(threads);
-	
 	for(int i=0; i<threads; i++) {
-		threadVector4.at(i) = std::thread (containsTest, set, iterations, false);
+		threadVector.at(i) = std::thread (containsTest, set, iterations, false);
 	}
 	
 	for(int i=0; i<threads; i++) {
-		threadVector4.at(i).join();
+		threadVector.at(i).join();
+	}
+	
+	for(int i=0; i<threads; i++) {
+		threadVector.at(i) = std::thread (mixedTest, set, i, iterations);
+	}
+	
+	for(int i=0; i<threads; i++) {
+		threadVector.at(i).join();
 	}
 	
 	std::cout << "test successfull \n";
@@ -216,8 +208,7 @@ void test(AMPSet *set, int threads, int iterations) {
 	
 }
 
-int main(int argc, char **argv) 
-{
+int main(int argc, char **argv) {
 	
 	CommandLineOptions cmdOption;
 	int rc = cmdOption.parse_args(argc, argv);
@@ -238,22 +229,19 @@ int main(int argc, char **argv)
 		n = 100;
 	}
 	
-	std::cout << n << " " << t << std::endl;
-
-	/*AMPReferenceSet rs1;
-	test(&rs1, t, n);
-	
+	std::cout << "testing FineGrainedLockingSet..." << std::endl;
 	FineGrainedLockingSet fgls1;
 	test(&fgls1, t, n);
 	
+	std::cout << "testing OptimisticSynchronizationSet..." << std::endl;
 	OptimisticSynchronizationSet oss1;
 	test(&oss1, t, n);	
 	
-	
+	std::cout << "testing LazySynchronizationSet..." << std::endl;
 	LazySynchronizationSet lss1;
 	test(&lss1, t, n);
-	*/
 	
+	std::cout << "testing LockFreeSet..." << std::endl;
 	LockFreeSet lfs1;
 	test(&lfs1, t, n);
 	
