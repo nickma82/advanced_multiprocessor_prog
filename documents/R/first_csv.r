@@ -86,10 +86,107 @@ throughputTable = tmp.newTable[0]
 throughputTable["ceres.lf" ] = dim(ceres.lf.time  )[1]
 throughputTable["mars.lf"  ] = dim(mars.lf.time   )[1]
 throughputTable["ceres.fgl"] = dim(ceres.fgl.time )[1]
-throughputTable["mars.fgl" ] = dim(mars.fgl.time  )[1]throughputTable["ceres.ls" ] = dim(ceres.ls.time  )[1]throughputTable["mars.ls"  ] = dim(mars.ls.time   )[1]throughputTable["ceres.os" ] = dim(ceres.os.time  )[1]throughputTable["mars.os"  ] = dim(mars.os.time   )[1]throughputTable["ceres.ref"] = dim(ceres.ref.time )[1]throughputTable["mars.ref" ] = dim(mars.ref.time  )[1]
+throughputTable["mars.fgl" ] = dim(mars.fgl.time  )[1]
+throughputTable["ceres.ls" ] = dim(ceres.ls.time  )[1]
+throughputTable["mars.ls"  ] = dim(mars.ls.time   )[1]
+throughputTable["ceres.os" ] = dim(ceres.os.time  )[1]
+throughputTable["mars.os"  ] = dim(mars.os.time   )[1]
+throughputTable["ceres.ref"] = dim(ceres.ref.time )[1]
+throughputTable["mars.ref" ] = dim(mars.ref.time  )[1]
 postscript("insert_throughput_allSets_allMachines.eps", horizontal=FALSE)
 ## bottom, left, top and right margins
 par(mar=c(7,6,1,2)+0.1,mgp=c(5,1,0)) ##format the labels
 barplot(throughputTable, las=2, xlab="benchmarked sets", ylab="(number of operation)/5sec", col=c(9,9,9,9,9,8,8,8,8,8))
 dev.off()
 
+
+
+
+mars.ref <- read.table("throughput_mars_ref.csv", sep=",", head=TRUE)
+mars.os <- read.table("throughput_mars_os.csv", sep=",", head=TRUE)
+mars.ls <- read.table("throughput_mars_ls.csv", sep=",", head=TRUE)
+mars.lf <- read.table("throughput_mars_lf.csv", sep=",", head=TRUE)
+ceres.ls <- read.table("throughput_ceres_ls.csv", sep=",", head=TRUE)
+ceres.lf <- read.table("throughput_ceres_lf.csv", sep=",", head=TRUE)
+ceres.ref <- read.table("throughput_ceres_ref.csv", sep=",", head=TRUE)
+ceres.os <- read.table("throughput_ceres_os.csv", sep=",", head=TRUE)
+
+tmp.newTable = table(1:1)
+tmp.newTable["foo"] = 42
+add.list =  tmp.newTable[0]
+add.list["ref"] = mean(mars.ref$add)
+add.list["os"] = mean(mars.os$add)
+add.list["ls"] = mean(mars.ls$add)
+add.list["lf"] = mean(mars.lf$add)
+postscript("throughput_mars_add.eps", horizontal=FALSE)
+barplot(add.list, ylab="milliseconds")
+dev.off()
+
+add.list["ref"] = mean(mars.ref$remove)
+add.list["os"] = mean(mars.os$remove)
+add.list["ls"] = mean(mars.ls$remove)
+add.list["lf"] = mean(mars.lf$remove)
+postscript("throughput_mars_remove.eps", horizontal=FALSE)
+barplot(add.list, ylab="milliseconds")
+dev.off()
+
+add.list["ref"] = mean(mars.ref$contains)
+add.list["os"] = mean(mars.os$contains)
+add.list["ls"] = mean(mars.ls$contains)
+add.list["lf"] = mean(mars.lf$contains)
+postscript("throughput_mars_contains.eps", horizontal=FALSE)
+barplot(add.list, ylab="milliseconds")
+dev.off()
+
+add.list["ref"] = mean(mars.ref$mixed)
+add.list["os"] = mean(mars.os$mixed)
+add.list["ls"] = mean(mars.ls$mixed)
+add.list["lf"] = mean(mars.lf$mixed)
+postscript("throughput_mars_mixed.eps", horizontal=FALSE)
+barplot(add.list, ylab="milliseconds")
+dev.off()
+
+
+
+add.list =  tmp.newTable[0]
+add.list["ref"] = mean(ceres.ref$add)
+add.list["os"] = mean(ceres.os$add)
+add.list["ls"] = mean(ceres.ls$add)
+add.list["lf"] = mean(ceres.lf$add)
+postscript("throughput_ceres_add.eps", horizontal=FALSE)
+barplot(add.list, ylab="milliseconds")
+dev.off()
+
+add.list["ref"] = mean(ceres.ref$remove)
+add.list["os"] = mean(ceres.os$remove)
+add.list["ls"] = mean(ceres.ls$remove)
+add.list["lf"] = mean(ceres.lf$remove)
+postscript("throughput_ceres_remove.eps", horizontal=FALSE)
+barplot(add.list, ylab="milliseconds")
+dev.off()
+
+add.list["ref"] = mean(ceres.ref$contains)
+add.list["os"] = mean(ceres.os$contains)
+add.list["ls"] = mean(ceres.ls$contains)
+add.list["lf"] = mean(ceres.lf$contains)
+postscript("throughput_ceres_contains.eps", horizontal=FALSE)
+barplot(add.list, ylab="milliseconds")
+dev.off()
+
+add.list["ref"] = mean(ceres.ref$mixed)
+add.list["os"] = mean(ceres.os$mixed)
+add.list["ls"] = mean(ceres.ls$mixed)
+add.list["lf"] = mean(ceres.lf$mixed)
+postscript("throughput_ceres_mixed.eps", horizontal=FALSE)
+barplot(add.list, ylab="milliseconds")
+dev.off()
+
+colMeans(mars.ref)
+colMeans(mars.os)
+colMeans(mars.ls)
+colMeans(mars.lf)
+
+colMeans(ceres.ref)
+colMeans(ceres.os)
+colMeans(ceres.ls)
+colMeans(ceres.lf)
