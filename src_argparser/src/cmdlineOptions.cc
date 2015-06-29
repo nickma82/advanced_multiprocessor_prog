@@ -59,21 +59,21 @@ int CommandLineOptions::parse_args(int argc, char **argv) {
 
 			/* the actual work */
 			std::string strOptArg = (optarg) ? optarg : OPTARG_BOOL_ISAVAILABLE;
-			auto retPair = _optionsMap.insert ( std::pair<std::string,std::string>(optionName, strOptArg) );
+			/*auto retPair = */_optionsMap.insert ( std::pair<std::string,std::string>(optionName, strOptArg) );
 
 			/* some debugging */
-			std::cout << "option '" <<  optionName << "' ";
+			/*std::cout << "option '" <<  optionName << "' ";
 			if (optarg) {
 				std::cout << "with arg " <<  optarg << " strOptArg:" << strOptArg;
 			}
 			if (retPair.second == false)
-				std::cout << "element '" << optionName << "' already existed";
+				std::cout << "element '" << optionName << "' already existed";*/
 			/* vorletztes Argument, derzeit alles nullptr */
-			if ( (option_index >= 0) && (optarg) && (tmpValue >= 0) ) {
+			/*if ( (option_index >= 0) && (optarg) && (tmpValue >= 0) ) {
 				std::cout << "additionally tmpValue is set to: " << tmpValue;
 			}
-			std::cout << std::endl;
-
+			std::cout << std::endl;*/
+			
 			break;
 		}
 		case '?':
