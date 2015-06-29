@@ -11,7 +11,9 @@
 #include <thread>
 #include <vector>
 #include <set>
+#include <string>
 #include <stdlib.h>
+#include <atomic>
 
 #include "OptimisticSynchronizationSet.h"
 #include "FineGrainedLockingSet.h"
@@ -21,8 +23,7 @@
 #include "AMPSet.h"
 #include "cmdlineOptions.h"
 
-void addTest(AMPSet *set, int n, std::vector<long> *vec)
-{	
+void addTest(AMPSet *set, int n, std::vector<long> *vec){	
 	long i=0;
 	
 	while(i<n) {
@@ -36,8 +37,7 @@ void addTest(AMPSet *set, int n, std::vector<long> *vec)
 	
 }
 
-void containsTest(AMPSet *set, int n, bool expected)
-{
+void containsTest(AMPSet *set, int n, bool expected){
 	long i=0;
 	
 	while(i<n) {
@@ -52,8 +52,7 @@ void containsTest(AMPSet *set, int n, bool expected)
 	
 }
 
-void removeTest(AMPSet *set, int n, std::vector<long> *vec)
-{
+void removeTest(AMPSet *set, int n, std::vector<long> *vec){
 	long i=0;
 	
 	while(i<n) {
@@ -70,23 +69,26 @@ void removeTest(AMPSet *set, int n, std::vector<long> *vec)
 void mixedTest(AMPSet *set, long id, int n) {
 	
 	int i = 0;
-	
-	while(i<n) {
-		
+				
+	while(i<n/4) {
+
 		if(set->add(id) != true) {
-			std::cout << "wrong add!! \n";
+			std::cout << "wrong add=false!!\n";
 			exit(EXIT_FAILURE);
 		}
+
 		if(set->contains(id) != true) {
-			std::cout << "wrong contains!! \n";
+			std::cout << "wrong contains=false!!\n";
 			exit(EXIT_FAILURE);
 		}
+
 		if(set->remove(id) != true) {
-			std::cout << "wrong remove!! \n";
+			std::cout << "wrong remove=false!!\n";;
 			exit(EXIT_FAILURE);
 		}
+
 		if(set->contains(id) != false) {
-			std::cout << "wrong contains!! \n";
+			std::cout << "wrong contains=true!!\n";
 			exit(EXIT_FAILURE);
 		}
 		i++;
@@ -196,7 +198,9 @@ void test(AMPSet *set, int threads, int iterations) {
 		threadVector.at(i).join();
 	}
 	
-	for(int i=0; i<threads; i++) {
+	//mixed test
+		
+	for(long i=0; i<threads; i++) {
 		threadVector.at(i) = std::thread (mixedTest, set, i, iterations);
 	}
 	

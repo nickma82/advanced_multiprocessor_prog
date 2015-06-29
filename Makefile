@@ -34,12 +34,12 @@ INC_PARAMS=$(foreach d, $(INCLUDE_DIR), -I$d)
 TARGET =	ampp_root
 TESTTARGET = ampp_test
 
-all:	benchmark test
+all:	$(TARGET) $(TESTTARGET)
 
-benchmark: $(OBJS) $(BENCHMARKOBJS)
+$(TARGET): $(OBJS) $(BENCHMARKOBJS)
 	$(CXX) -o $(TARGET) $(BENCHMARKOBJS) $(OBJS) $(LIBS)
 
-test:  $(OBJS) $(TESTOBJS)
+$(TESTTARGET):  $(OBJS) $(TESTOBJS)
 	$(CXX) -o $(TESTTARGET) $(TESTOBJS) $(OBJS) $(LIBS)	
 
 clean:
