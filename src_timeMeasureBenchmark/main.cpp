@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
 	}
 	clock_gettime(CLOCK_MONOTONIC, &tmpTimeNow);
 	timeDiff(&result, &tmpTimeNow, &clockGettime);
-	std::cout << "glock_gettime, \t\t\t\t\t" << result.tv_sec << "." << std::setfill ('0') << std::setw (9) << result.tv_nsec << std::endl;
+	std::cout << "clock_gettime, \t\t\t\t\t" << result.tv_sec << "." << std::setfill ('0') << std::setw (9) << result.tv_nsec << std::endl;
 
 	return 0;
 }

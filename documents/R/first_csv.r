@@ -87,9 +87,22 @@ throughputTable["ceres.lf" ] = dim(ceres.lf.time  )[1]
 throughputTable["mars.lf"  ] = dim(mars.lf.time   )[1]
 throughputTable["ceres.fgl"] = dim(ceres.fgl.time )[1]
 throughputTable["mars.fgl" ] = dim(mars.fgl.time  )[1]throughputTable["ceres.ls" ] = dim(ceres.ls.time  )[1]throughputTable["mars.ls"  ] = dim(mars.ls.time   )[1]throughputTable["ceres.os" ] = dim(ceres.os.time  )[1]throughputTable["mars.os"  ] = dim(mars.os.time   )[1]throughputTable["ceres.ref"] = dim(ceres.ref.time )[1]throughputTable["mars.ref" ] = dim(mars.ref.time  )[1]
+
 postscript("insert_throughput_allSets_allMachines.eps", horizontal=FALSE)
 ## bottom, left, top and right margins
 par(mar=c(7,6,1,2)+0.1,mgp=c(5,1,0)) ##format the labels
 barplot(throughputTable, las=2, xlab="benchmarked sets", ylab="(number of operation)/5sec", col=c(9,9,9,9,9,8,8,8,8,8))
 dev.off()
 
+
+
+#### time benchmark
+time.benchmark  <- read.table("~/Downloads/ampp_measurements/out_timeBenchmark",  sep=",", head=TRUE)
+time.benchmark.mean = aggregate(cbind(time_.s.) ~ method, data=time.benchmark, FUN=mean)
+
+postscript("timer_benchmarks.eps", horizontal=FALSE)
+## bottom, left, top and right margins
+par(mar=c(7,8,1,2)+0.1,mgp=c(5,1,0)) ##format the labels
+barplot(time.benchmark.mean$time_.s., horiz=TRUE, xlab="time [s]", las=2, 
+	names.arg=c("clock", "gettimeofday", "glock_gettime", "high_resolution", "steady_clock") )
+dev.off()
