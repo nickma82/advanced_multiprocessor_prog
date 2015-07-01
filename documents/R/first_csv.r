@@ -106,6 +106,7 @@ dev.off()
 
 
 mars.ref <- read.table("throughput_mars_ref.csv", sep=",", head=TRUE)
+mars.fgl <- read.table("throughput_mars_fgl.csv", sep=",", head=TRUE)
 mars.os <- read.table("throughput_mars_os.csv", sep=",", head=TRUE)
 mars.ls <- read.table("throughput_mars_ls.csv", sep=",", head=TRUE)
 mars.lf <- read.table("throughput_mars_lf.csv", sep=",", head=TRUE)
@@ -116,11 +117,11 @@ ceres.os <- read.table("throughput_ceres_os.csv", sep=",", head=TRUE)
 
 tmp.newTable = table(1:1)
 tmp.newTable["foo"] = 42
-add.list =  tmp.newTable[0]
-add.list["ref"] = mean(mars.ref$add)
-add.list["os"] = mean(mars.os$add)
-add.list["ls"] = mean(mars.ls$add)
-add.list["lf"] = mean(mars.lf$add)
+ceres.list =  tmp.newTable[0]
+ceres.list["ref"] = mean(ceres.ref$add)
+ceres.list["os"] = mean(ceres.os$add)
+ceres.list["ls"] = mean(ceres.ls$add)
+ceres.list["lf"] = mean(ceres.lf$add)
 postscript("throughput_mars_add.eps", horizontal=FALSE)
 barplot(add.list, ylab="milliseconds")
 dev.off()
@@ -193,3 +194,79 @@ colMeans(ceres.ref)
 colMeans(ceres.os)
 colMeans(ceres.ls)
 colMeans(ceres.lf)
+
+tmp.newTable = table(1:1)
+tmp.newTable["foo"] = 42
+mars.list =  tmp.newTable[0]
+mars.list["ref"] = mean(mars.ref$add)
+mars.list["os"] = mean(mars.os$add)
+mars.list["ls"] = mean(mars.ls$add)
+mars.list["lf"] = mean(mars.lf$add)
+tmp.newTable = table(1:1)
+tmp.newTable["foo"] = 42
+ceres.list =  tmp.newTable[0]
+ceres.list["ref"] = mean(ceres.ref$add)
+ceres.list["os"] = mean(ceres.os$add)
+ceres.list["ls"] = mean(ceres.ls$add)
+ceres.list["lf"] = mean(ceres.lf$add)
+height <- rbind(mars.list, ceres.list)
+postscript("throughput_add.eps")
+barplot(height, beside = TRUE, ylab="runtime[milliseconds]", legend.text = c("Mars", "Ceres"))
+dev.off()
+
+tmp.newTable = table(1:1)
+tmp.newTable["foo"] = 42
+mars.list =  tmp.newTable[0]
+mars.list["ref"] = mean(mars.ref$contains)
+mars.list["os"] = mean(mars.os$contains)
+mars.list["ls"] = mean(mars.ls$contains)
+mars.list["lf"] = mean(mars.lf$contains)
+tmp.newTable = table(1:1)
+tmp.newTable["foo"] = 42
+ceres.list =  tmp.newTable[0]
+ceres.list["ref"] = mean(ceres.ref$contains)
+ceres.list["os"] = mean(ceres.os$contains)
+ceres.list["ls"] = mean(ceres.ls$contains)
+ceres.list["lf"] = mean(ceres.lf$contains)
+height <- rbind(mars.list, ceres.list)
+postscript("throughput_contains.eps")
+barplot(height, beside = TRUE, ylab="runtime[milliseconds]", legend.text = c("Mars", "Ceres"))
+dev.off()
+
+tmp.newTable = table(1:1)
+tmp.newTable["foo"] = 42
+mars.list =  tmp.newTable[0]
+mars.list["ref"] = mean(mars.ref$remove)
+mars.list["os"] = mean(mars.os$remove)
+mars.list["ls"] = mean(mars.ls$remove)
+mars.list["lf"] = mean(mars.lf$remove)
+tmp.newTable = table(1:1)
+tmp.newTable["foo"] = 42
+ceres.list =  tmp.newTable[0]
+ceres.list["ref"] = mean(ceres.ref$remove)
+ceres.list["os"] = mean(ceres.os$remove)
+ceres.list["ls"] = mean(ceres.ls$remove)
+ceres.list["lf"] = mean(ceres.lf$remove)
+height <- rbind(mars.list, ceres.list)
+postscript("throughput_remove.eps")
+barplot(height, beside = TRUE, ylab="runtime[milliseconds]", legend.text = c("Mars", "Ceres"))
+dev.off()
+
+tmp.newTable = table(1:1)
+tmp.newTable["foo"] = 42
+mars.list =  tmp.newTable[0]
+mars.list["ref"] = mean(mars.ref$mixed)
+mars.list["os"] = mean(mars.os$mixed)
+mars.list["ls"] = mean(mars.ls$mixed)
+mars.list["lf"] = mean(mars.lf$mixed)
+tmp.newTable = table(1:1)
+tmp.newTable["foo"] = 42
+ceres.list =  tmp.newTable[0]
+ceres.list["ref"] = mean(ceres.ref$mixed)
+ceres.list["os"] = mean(ceres.os$mixed)
+ceres.list["ls"] = mean(ceres.ls$mixed)
+ceres.list["lf"] = mean(ceres.lf$mixed)
+height <- rbind(mars.list, ceres.list)
+postscript("throughput_mixed.eps")
+barplot(height, beside = TRUE, ylab="runtime[milliseconds]", legend.text = c("Mars", "Ceres"))
+dev.off()
