@@ -78,6 +78,8 @@ dev.off()
 ## @ref http://stackoverflow.com/questions/15047742/sum-of-rows-based-on-column-value
 ## @ref http://r.789695.n4.nabble.com/R-barplot-different-colors-for-the-bar-and-the-strips-td807339.html
 ## @ref http://www.r-bloggers.com/setting-graph-margins-in-r-using-the-par-function-and-lots-of-cow-milk/
+## @ref http://statmethods.net/graphs/bar.html
+
 my.data.latency = aggregate(cbind(Duration) ~ Thread, data=my.data, FUN=mean)
 boxplot(my.data.latency$Duration, xlab="avrg duration per thread [ns]", horizontal=TRUE)
 
@@ -97,6 +99,7 @@ dev.off()
 
 
 #### time benchmark
+## @ref http://www.ats.ucla.edu/stat/r/faq/barplotplus.htm
 time.benchmark  <- read.table("~/Downloads/ampp_measurements/out_timeBenchmark",  sep=",", head=TRUE)
 time.benchmark.mean = aggregate(cbind(time_.s.) ~ method, data=time.benchmark, FUN=mean)
 
