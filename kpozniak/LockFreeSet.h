@@ -12,10 +12,16 @@
 #include "AMPSet.h"
 
 
+/**
+ * minimalistic node, because the "marked" flag introduced
+ * in lazy synchronization, is hidden in the pointer
+ *
+ * "marked" tells if it's logically removed from the set
+ */
 class LfsNode {
 public:
-	long item;
-	LfsNode* next;
+	long item;		// value of the node
+	LfsNode* next;	// pointer to the next node in the list
 	LfsNode(long item, LfsNode* next);
 };
 
@@ -46,6 +52,7 @@ public:
 	
 	bool remove(long item);
 	
+
 	bool contains(long item);
 };
 

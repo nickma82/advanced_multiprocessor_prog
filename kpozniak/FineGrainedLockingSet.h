@@ -13,10 +13,11 @@
 #include "AMPSet.h"
 
 class Node {
+std::mutex mutex;	// critical section lock
+
 public:
-	long item;
-	Node* next;
-	std::mutex mutex;
+	long item;		// value of the node
+	Node* next;		// pointer to the next node in the list
 	Node(long item, Node* next);
 	void lock();
 	void unlock();
@@ -36,6 +37,10 @@ class FineGrainedLockingSet: public AMPSet
 	
 protected:
 	Node* head;
+
+	/**
+	 * FGL locks already in the find
+	 */
 	virtual Window find(long l);
 
 	
@@ -47,6 +52,10 @@ public:
 	
 	virtual bool remove(long item);
 	
+	/**
+	 * calles find(..) and locks necessary elements
+	 * with that call.
+	 */
 	virtual bool contains(long item);
 	
 };

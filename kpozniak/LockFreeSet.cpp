@@ -6,7 +6,9 @@
 *
 */
 #include <climits>
+#include <stdint.h>
 #include "LockFreeSet.h"
+
 
 LockFreeSet::LockFreeSet() {
 	head = new LfsNode(LONG_MIN, new LfsNode(LONG_MAX, nullptr));
@@ -91,6 +93,8 @@ retry:
 	LfsNode* curr_withMark = pred_withMark->next; //dereferencing head is safe, can not be marked
 	while (true) {
 		LfsNode* succ_withMark = getPointer(curr_withMark)->next;
+
+		//  "get help from other threads" scheme follows now
 		while (isMarked(succ_withMark)) {
 
 			LfsNode* succ_withMarkMark = succ_withMark;
@@ -126,14 +130,17 @@ LfsNode::LfsNode(long item, LfsNode* next){
 }
 
 
+const uint64_t setFilter_mostSig_bit = 		0x8000000000000000;
+const uint64_t clearFilter_mostSig_bit =	0x7fffffffffffffff;
+
 inline LfsNode* LockFreeSet::getPointer(LfsNode* n) {
-	return (LfsNode*)((unsigned long)n bitand 0x7fffffffffffffff);
+	return (LfsNode*)((unsigned long)n bitand clearFilter_mostSig_bit);
 }
 
 inline LfsNode* LockFreeSet::mark(LfsNode* n) {
-	return (LfsNode*)((unsigned long)n bitor 0x8000000000000000);
+	return (LfsNode*)((unsigned long)n bitor setFilter_mostSig_bit);
 }
 
 inline bool LockFreeSet::isMarked(LfsNode* n) {
-	return ((unsigned long)n) > 0x8000000000000000;
+	return ((unsigned long)n) > setFilter_mostSig_bit;
 }
